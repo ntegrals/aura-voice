@@ -24,6 +24,7 @@
     "react-dom": "18.2.0",
     "react-media-recorder": "^1.6.5",
     "recorder-js": "^1.0.7",
+    "supports-color": "^8.1.1",
     "tailwindcss": "3.3.3",
     "typescript": "5.1.6",
     "whisper-speech-to-text": "^1.0.3"
