@@ -1,4 +1,8 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {}
+const nextConfig = {
+  experimental: {
+    serverComponentsExternalPackages: ["ffmpeg-static"],
+  },
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
