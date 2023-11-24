@@ -4,6 +4,7 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
+import toast from "react-hot-toast";
 
 // This is the main component of our application
 export default function AssistantButton() {
@@ -109,7 +110,6 @@ export default function AssistantButton() {
                 const base64Audio = reader.result.split(",")[1]; // Remove the data URL prefix
 
                 // Speech to text
-                console.time("Speech to Text");
                 const response = await fetch("/api/speechToText", {
                   method: "POST",
                   headers: {
@@ -126,12 +126,6 @@ export default function AssistantButton() {
                 }
                 console.timeEnd("Speech to Text");
 
-                // Run the rest of the code
-
-                // console.log("RES", data.result);
-
-                console.time("LLM");
-
                 // Get LLM completion
                 const completion = await axios.post("/api/chat", {
                   messages: [
@@ -142,17 +136,8 @@ export default function AssistantButton() {
                   ],
                 });
 
-                console.timeEnd("LLM");
-
-                console.time("Text to Speech");
-
                 // Convert to speech
                 handlePlayButtonClick(completion.data);
-
-                console.timeEnd("Text to Speech");
-
-                // setResult(data.result);
-                console.timeEnd("Entire function");
               };
             } catch (error) {
               console.error(error);
@@ -177,6 +162,17 @@ export default function AssistantButton() {
   };
   // Function to stop recording
   const stopRecording = () => {
+    toast("Thinking", {
+      duration: 3000,
+      icon: "💭",
+      style: {
+        borderRadius: "10px",
+        background: "#1E1E1E",
+        color: "#F9F9F9",
+        border: "0.5px solid #3B3C3F",
+      },
+      position: "top-right",
+    });
     if (mediaRecorder) {
       //@ts-ignore
 
@@ -192,40 +188,26 @@ export default function AssistantButton() {
   // listening
   // thinking
 
-  const show = {
-    opacity: 1,
-    display: "block",
-  };
-
-  const listening = {
-    opacity: 1,
-    display: "block",
-  };
-
-  const hide = {
-    opacity: 0,
-    transitionEnd: {
-      display: "none",
-    },
-  };
-
-
   return (
-    // <main>
-    //   <div>
-    //     <h2>
-    //       Convert audio to text <span>-&gt;</span>
-    //     </h2>
-    //     <button onClick={recording ? stopRecording : startRecording}>
-    //       {recording ? "Stop Recording" : "Start Recording"}
-    //     </button>
-    //     <p>{result}</p>
-    //   </div>
-    // </main>
     <div>
       <motion.div
-      
-        onClick={recording ? stopRecording : startRecording}
+        onClick={() => {
+          recording
+            ? null
+            : toast("Listening - Click again to send", {
+                icon: "🟢",
+                style: {
+                  borderRadius: "10px",
+                  background: "#1E1E1E",
+                  color: "#F9F9F9",
+                  border: "0.5px solid #3B3C3F",
+                },
+                position: "top-right",
+              });
+
+          recording ? stopRecording() : startRecording();
+        }}
+        // onClick={recording ? stopRecording : startRecording}
         className="hover:scale-105 ease-in-out duration-500 hover:cursor-pointer text-[70px]"
       >
         <div className="rainbow-container">
