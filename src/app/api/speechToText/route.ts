@@ -4,7 +4,7 @@ import { exec } from "child_process";
 import fs from "fs";
 import { NextResponse } from "next/server";
 
-const ffmpeg = require("ffmpeg-static");
+const ffmpegPath = require("ffmpeg-static").path;
 
 // Promisify the exec function from child_process
 const util = require("util");
@@ -83,7 +83,7 @@ async function convertAudioToMp3(audioData: any) {
   fs.writeFileSync(inputPath, audioData);
   // Convert the audio to MP3 using ffmpeg
   const outputPath = "/tmp/output.mp3";
-  await execAsync(`ffmpeg -i ${inputPath} ${outputPath}`);
+  await execAsync(`${ffmpegPath} -i ${inputPath} ${outputPath}`);
   // Read the converted audio data
   const mp3AudioData = fs.readFileSync(outputPath);
   // Delete the temporary files
