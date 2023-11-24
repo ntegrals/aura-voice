@@ -4,7 +4,7 @@ import { exec } from "child_process";
 import fs from "fs";
 import { NextResponse } from "next/server";
 
-const ffmpegPath = require("ffmpeg-static").path;
+const ffmpegPath = require("ffmpeg-static");
 
 // Promisify the exec function from child_process
 const util = require("util");
