@@ -42,7 +42,7 @@ export default function page() {
             alt="Main Logo"
             width={650}
             height={100}
-            priority
+            // priority
             // <Image
             //   className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
             //   src="/next.svg"
