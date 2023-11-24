@@ -16,6 +16,7 @@
     "autoprefixer": "10.4.14",
     "axios": "^1.6.0",
     "debug": "^4.3.4",
+    "ffmpeg-static": "^5.2.0",
     "framer-motion": "^10.16.4",
     "langchain": "^0.0.182",
     "next": "13.4.13",
