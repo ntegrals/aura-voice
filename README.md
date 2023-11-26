@@ -1,35 +1,86 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+<a name="readme-top"></a>
 
-## Getting Started
+<br />
+<div align="center">
 
-First, run the development server:
+<h3 align="center">Voice Assistant for Web</h3>
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+  <p align="center">
+    Siri for the web. A smart voice assistant optimized for low latency responses. Uses Vercel Edge Functions, Whisper Speech Recognition, GPT-3.5 Turbo and Eleven Labs TTS streaming.
+    <br />
+    <br />
+    <a href="https://github.com/ntegrals/voice-assistant">View Demo</a>
+    ·
+    <a href="https://github.com/ntegrals/voice-assistant/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/ntegrals/voice-assistant/issues">Request Feature</a>
+  </p>
+</div>
+<a href="https://github.com/ntegrals/voice-assistant">
+    <img src="images/header.png" alt="Logo">
+  </a>
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+    ✅ Vercel Edge Functions
+    ✅ Whisper Speech Recognition
+    ✅ GPT-3.5 Turbo
+    ✅ Eleven Labs TTS streaming
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## Motivation
 
-## Learn More
+Voice Assistants have become an integral part of our lives. They are everywhere. In our phones, in our cars, in our homes. Why not also on the web?
 
-To learn more about Next.js, take a look at the following resources:
+Until recently the main problem with voice assistants on the web was the latency. It took too long to send the audio to the server, generate an LLM completion and send speech back. The recent advances of OpenAI, Eleven Labs and Vercel have made it possible to build a voice assistant that is fast enough to be used on the web.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+I would love to for this repo to become the go-to place for people who want to build their own voice assistant. I've been working on this project for a while now and I'm really excited to share it with you.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+## Installation
 
-## Deploy on Vercel
+1. Clone the repo
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+   ```sh
+   git clone https://github.com/ntegrals/voice-assistant
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
-# voice-assistant-web
+2. Get an API Key from [https://openai.com/](https://openai.com/) and [https://elevenlabs.com/](https://elevenlabs.com/)
+
+3. Install the dependencies
+   ```sh
+   npm install
+   ```
+4. Run the app
+   ```
+   npm run dev
+   ```
+5. Deploy to vercel
+
+## Contact
+
+Hi! Thanks for checking out and using this library. If you are interested in discussing your project, require mentorship, consider hiring me, or just wanna chat - I'm happy to talk.
+
+You can send me an email to get in touch: j.schoen@mail.com or message me on Twitter: [@julianschoen](https://twitter.com/julianschoen)
+
+If you'd just want to give something back, I've got a Buy Me A Coffee account:
+
+<a href="https://www.buymeacoffee.com/ntegrals">
+<img src="images/buymeacoffee.png" alt="buymeacoffee" width="192">
+</a>
+
+Thanks and have an awesome day 👋
+
+## Disclaimer
+
+Voice Assistant, is an experimental application and is provided "as-is" without any warranty, express or implied. By using this software, you agree to assume all risks associated with its use, including but not limited to data loss, system failure, or any other issues that may arise.
+
+The developers and contributors of this project do not accept any responsibility or liability for any losses, damages, or other consequences that may occur as a result of using this software. You are solely responsible for any decisions and actions taken based on the information provided by Voice Assistant.
+
+Please note that the use of the GPT-4 language model can be expensive due to its token usage. By utilizing this project, you acknowledge that you are responsible for monitoring and managing your own token usage and the associated costs. It is highly recommended to check your OpenAI API usage regularly and set up any necessary limits or alerts to prevent unexpected charges.
+
+By using Voice Assistant, you agree to indemnify, defend, and hold harmless the developers, contributors, and any affiliated parties from and against any and all claims, damages, losses, liabilities, costs, and expenses (including reasonable attorneys' fees) arising from your use of this software or your violation of these terms.
+
+<!-- LICENSE -->
+
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
