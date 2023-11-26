@@ -14,16 +14,6 @@ const openai = new OpenAI({
 });
 // This function handles POST requests to the /api/speechToText route
 export async function POST(request: any) {
-  // Check if the OpenAI API key is configured
-  //   if (!configuration.apiKey) {
-  //     return NextResponse.json(
-  //       {
-  //         error:
-  //           "OpenAI API key not configured, please follow instructions in README.md",
-  //       },
-  //       { status: 500 }
-  //     );
-  //   }
   // Parse the request body
   const req = await request.json();
   // Extract the audio data from the request body
@@ -58,11 +48,6 @@ export async function POST(request: any) {
 }
 // This function converts audio data to text using the OpenAI API
 async function convertAudioToText(audioData: any) {
-  // Convert the audio data to MP3 format
-  // const mp3AudioData = await convertAudioToMp3(audioData);
-  // // Write the MP3 audio data to a file
-  // const outputPath = "/tmp/output.mp3";
-  // fs.writeFileSync(outputPath, mp3AudioData);
   const outputPath = "/tmp/input.webm";
   fs.writeFileSync(outputPath, audioData);
 
@@ -77,18 +62,3 @@ async function convertAudioToText(audioData: any) {
   const transcribedText = response.text;
   return transcribedText;
 }
-// // This function converts audio data to MP3 format using ffmpeg
-// async function convertAudioToMp3(audioData: any) {
-//   // Write the audio data to a file
-//   const inputPath = "/tmp/input.webm";
-//   fs.writeFileSync(inputPath, audioData);
-//   // Convert the audio to MP3 using ffmpeg
-//   const outputPath = "/tmp/output.mp3";
-//   await execAsync(`${ffmpegPath} -i ${inputPath} ${outputPath}`);
-//   // Read the converted audio data
-//   const mp3AudioData = fs.readFileSync(outputPath);
-//   // Delete the temporary files
-//   fs.unlinkSync(inputPath);
-//   fs.unlinkSync(outputPath);
-//   return mp3AudioData;
-// }
