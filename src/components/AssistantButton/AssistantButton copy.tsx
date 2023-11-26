@@ -8,9 +8,6 @@ import toast from "react-hot-toast";
 
 // This is the main component of our application
 export default function AssistantButton() {
-  const [mediaRecorderInitialized, setMediaRecorderInitialized] =
-    useState(false);
-
   const [loading, setLoading] = useState(false);
 
   const [audioPlaying, setAudioPlaying] = useState(false);
@@ -83,10 +80,80 @@ export default function AssistantButton() {
   // This array will hold the audio data
   let chunks: any = [];
   // This useEffect hook sets up the media recorder when the component mounts
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      navigator.mediaDevices
+        .getUserMedia({ audio: true })
+        .then((stream) => {
+          const newMediaRecorder = new MediaRecorder(stream);
+          newMediaRecorder.onstart = () => {
+            chunks = [];
+          };
+          newMediaRecorder.ondataavailable = (e) => {
+            chunks.push(e.data);
+          };
+          newMediaRecorder.onstop = async () => {
+            console.time("Entire function");
 
+            const audioBlob = new Blob(chunks, { type: "audio/webm" });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const audio = new Audio(audioUrl);
+            audio.onerror = function (err) {
+              console.error("Error playing audio:", err);
+            };
+            // audio.play();
+            try {
+              const reader = new FileReader();
+              reader.readAsDataURL(audioBlob);
+              reader.onloadend = async function () {
+                //@ts-ignore
+                const base64Audio = reader.result.split(",")[1]; // Remove the data URL prefix
+
+                // Speech to text
+                const response = await fetch("/api/speechToText", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({ audio: base64Audio }),
+                });
+                const data = await response.json();
+                if (response.status !== 200) {
+                  throw (
+                    data.error ||
+                    new Error(`Request failed with status ${response.status}`)
+                  );
+                }
+                console.timeEnd("Speech to Text");
+
+                // Get LLM completion
+                const completion = await axios.post("/api/chat", {
+                  messages: [
+                    {
+                      role: "user",
+                      content: `${data.result} Your answer has to be as consise as possible.`,
+                    },
+                  ],
+                });
+
+                // Convert to speech
+                handlePlayButtonClick(completion.data);
+              };
+            } catch (error) {
+              console.error(error);
+              //@ts-ignore
+              alert(error.message);
+            }
+          };
+          //@ts-ignore
+          setMediaRecorder(newMediaRecorder);
+        })
+        .catch((err) => console.error("Error accessing microphone:", err));
+    }
+  }, []);
   // Function to start recording
   const startRecording = () => {
-    if (mediaRecorder && mediaRecorderInitialized) {
+    if (mediaRecorder) {
       //@ts-ignore
 
       mediaRecorder.start();
@@ -96,14 +163,13 @@ export default function AssistantButton() {
   // Function to stop recording
   const stopRecording = () => {
     toast("Thinking", {
-      duration: 5000,
+      duration: 3000,
       icon: "💭",
       style: {
         borderRadius: "10px",
         background: "#1E1E1E",
         color: "#F9F9F9",
         border: "0.5px solid #3B3C3F",
-        fontSize: "14px",
       },
       position: "top-right",
     });
@@ -126,102 +192,6 @@ export default function AssistantButton() {
     <div>
       <motion.div
         onClick={() => {
-          if (typeof window !== "undefined" && !mediaRecorderInitialized) {
-            // Set the init state to true, so we don't init on every click
-            mediaRecorderInitialized ? null : setMediaRecorderInitialized(true);
-
-            navigator.mediaDevices
-              .getUserMedia({ audio: true })
-              .then((stream) => {
-                const newMediaRecorder = new MediaRecorder(stream);
-                newMediaRecorder.onstart = () => {
-                  chunks = [];
-                };
-                newMediaRecorder.ondataavailable = (e) => {
-                  chunks.push(e.data);
-                };
-                newMediaRecorder.onstop = async () => {
-                  console.time("Entire function");
-
-                  const audioBlob = new Blob(chunks, { type: "audio/webm" });
-                  const audioUrl = URL.createObjectURL(audioBlob);
-                  const audio = new Audio(audioUrl);
-                  audio.onerror = function (err) {
-                    console.error("Error playing audio:", err);
-                  };
-                  // audio.play();
-                  try {
-                    const reader = new FileReader();
-                    reader.readAsDataURL(audioBlob);
-                    reader.onloadend = async function () {
-                      //@ts-ignore
-                      const base64Audio = reader.result.split(",")[1]; // Remove the data URL prefix
-
-                      // Speech to text
-                      const response = await fetch("/api/speechToText", {
-                        method: "POST",
-                        headers: {
-                          "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({ audio: base64Audio }),
-                      });
-                      const data = await response.json();
-                      if (response.status !== 200) {
-                        throw (
-                          data.error ||
-                          new Error(
-                            `Request failed with status ${response.status}`
-                          )
-                        );
-                      }
-                      console.timeEnd("Speech to Text");
-
-                      // Get LLM completion
-                      const completion = await axios.post("/api/chat", {
-                        messages: [
-                          {
-                            role: "user",
-                            content: `${data.result} Your answer has to be as consise as possible.`,
-                          },
-                        ],
-                      });
-
-                      // Convert to speech
-                      handlePlayButtonClick(completion.data);
-                    };
-                  } catch (error) {
-                    console.error(error);
-                    //@ts-ignore
-                    alert(error.message);
-                  }
-                };
-                //@ts-ignore
-                setMediaRecorder(newMediaRecorder);
-              })
-              .catch((err) =>
-                console.error("Error accessing microphone:", err)
-              );
-          }
-
-          if (!mediaRecorderInitialized) {
-            toast(
-              "Please grant access to your microphone. Click the button again to speak.",
-              {
-                duration: 5000,
-                icon: "🙌",
-                style: {
-                  borderRadius: "10px",
-                  background: "#1E1E1E",
-                  color: "#F9F9F9",
-                  border: "0.5px solid #3B3C3F",
-                  fontSize: "14px",
-                },
-                position: "top-right",
-              }
-            );
-            return;
-          }
-
           recording
             ? null
             : toast("Listening - Click again to send", {
@@ -231,7 +201,6 @@ export default function AssistantButton() {
                   background: "#1E1E1E",
                   color: "#F9F9F9",
                   border: "0.5px solid #3B3C3F",
-                  fontSize: "14px",
                 },
                 position: "top-right",
               });
