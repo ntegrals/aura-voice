@@ -45,6 +45,13 @@ I would love to for this repo to become the go-to place for people who want to b
 
 2. Get an API Key from [https://openai.com/](https://openai.com/) and [https://elevenlabs.com/](https://elevenlabs.com/)
 
+Create a .env.local file in the root directory and add the following:
+
+    ```sh
+    OPENAI_API_KEY="YOUR OPENAI API KEY"
+    NEXT_PUBLIC_ELEVENLABS_API_KEY="YOUR ELEVENLABS API KEY"
+    ```
+
 3. Install the dependencies
    ```sh
    npm install

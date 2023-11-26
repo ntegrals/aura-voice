@@ -22,7 +22,7 @@ export default function AssistantButton() {
     const headers = {
       Accept: "audio/mpeg",
       "Content-Type": "application/json",
-      "xi-api-key": "02e5b3d20986160c37d6d48e9960ffe4",
+      "xi-api-key": process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY || "",
     };
     const data = {
       text: input,
