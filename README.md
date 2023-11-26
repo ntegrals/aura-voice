@@ -9,7 +9,7 @@
     A smart voice assistant optimized for low latency responses. Uses Vercel Edge Functions, Whisper Speech Recognition, GPT-3.5 Turbo and Eleven Labs TTS streaming.
     <br />
     <br />
-    <a href="https://github.com/ntegrals/voice-assistant">View Demo</a>
+    <a href="https://heyassistant.co">View Demo</a>
     ·
     <a href="https://github.com/ntegrals/voice-assistant/issues">Report Bug</a>
     ·
@@ -25,6 +25,10 @@
     ✅ A Siri-like voice assistant within your browser
     ✅ Optimized for low latency responses
     ✅ With the combined power of OpenAI, Whisper Speech Recognition and Eleven Labs
+
+## Demo
+
+You can test the voice assistant here: [https://heyassistant.co](https://heyassistant.co)
 
 ## Motivation
 
