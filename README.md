@@ -6,7 +6,7 @@
 <h3 align="center">Voice Assistant for Web</h3>
 
   <p align="center">
-    Siri for the web. A smart voice assistant optimized for low latency responses. Uses Vercel Edge Functions, Whisper Speech Recognition, GPT-3.5 Turbo and Eleven Labs TTS streaming.
+    A smart voice assistant optimized for low latency responses. Uses Vercel Edge Functions, Whisper Speech Recognition, GPT-3.5 Turbo and Eleven Labs TTS streaming.
     <br />
     <br />
     <a href="https://github.com/ntegrals/voice-assistant">View Demo</a>
@@ -34,6 +34,18 @@ Voice Assistants have become an integral part of our lives. They are everywhere.
 Until recently the main problem with voice assistants on the web was the latency. It took too long to send the audio to the server, generate an LLM completion and send speech back. The recent advances of OpenAI, Eleven Labs and Vercel have made it possible to build a voice assistant that is fast enough to be used on the web.
 
 I would love to for this repo to become the go-to place for people who want to build their own voice assistant. I've been working on this project for a while now and I'm really excited to share it with you.
+
+## Thoughts on latency and user experience
+
+The latency of the voice assistant is the most important factor for a good user experience. Currently there are 3 main factors that contribute to the latency:
+
+- The time it takes to transcribe the audio (Via Whisper Speech Recognition)
+- The time it takes to generate the response (Via GPT-3.5 Turbo)
+- The time it takes to stream the speech response (Via Eleven Labs TTS)
+
+Based on some tests I've done, the speech generation takes the most time. The longer the text to be synthesized, the longer it takes to generate the speech. The latency of the speech generation is also the most unpredictable.
+
+A possible mitigation strategy might be splitting the response into multiple parts and streaming them one after another. This would allow the user to start listening to the response while the rest of the response is being generated. I haven't implemented this yet, but it's something I'm considering. If you have any ideas on how to improve the latency, please let me know.
 
 ## Installation
 
