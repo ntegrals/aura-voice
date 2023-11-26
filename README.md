@@ -3,7 +3,7 @@
 <br />
 <div align="center">
 
-<h3 align="center">Voice Assistant for Web</h3>
+<h3 align="center">Voice Assistant for the Web</h3>
 
   <p align="center">
     A smart voice assistant optimized for low latency responses. Uses Vercel Edge Functions, Whisper Speech Recognition, GPT-3.5 Turbo and Eleven Labs TTS streaming.
