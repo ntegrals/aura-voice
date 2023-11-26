@@ -22,10 +22,9 @@
 
 ## Features
 
-    ✅ Vercel Edge Functions
-    ✅ Whisper Speech Recognition
-    ✅ GPT-3.5 Turbo
-    ✅ Eleven Labs TTS streaming
+    ✅ A Siri-like voice assistant within your browser
+    ✅ Optimized for low latency responses
+    ✅ With the combined power of OpenAI, Whisper Speech Recognition and Eleven Labs
 
 ## Motivation
 
@@ -46,6 +45,8 @@ The latency of the voice assistant is the most important factor for a good user 
 Based on some tests I've done, the speech generation takes the most time. The longer the text to be synthesized, the longer it takes to generate the speech. The latency of the speech generation is also the most unpredictable.
 
 A possible mitigation strategy might be splitting the response into multiple parts and streaming them one after another. This would allow the user to start listening to the response while the rest of the response is being generated. I haven't implemented this yet, but it's something I'm considering. If you have any ideas on how to improve the latency, please let me know.
+
+Another thing to keep in mind is perceived wait time. Based on some research, it seems that the perceived wait time is shorter if the user is given some kind of feedback while waiting. I've implemented a simple "thinking" notification that is shown while the assistant is processing the response, but I'm sure there are better ways to improve the perceived wait time.
 
 ## Installation
 
