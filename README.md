@@ -62,19 +62,22 @@ Another thing to keep in mind is perceived wait time. Based on some research, it
 
 2. Get an API Key from [https://openai.com/](https://openai.com/) and [https://elevenlabs.com/](https://elevenlabs.com/)
 
-   Create a .env.local file in the root directory and add the following:
+   Copy the .env.example file to .env.local and add your API keys
 
    ```sh
    OPENAI_API_KEY="YOUR OPENAI API KEY"
+   OPENAI_BASE_URL=(Optional)
    NEXT_PUBLIC_ELEVENLABS_API_KEY="YOUR ELEVENLABS API KEY"
    ```
 
 3. Install the dependencies
+
    ```sh
    npm install
    ```
+
 4. Run the app
-   ```
+   ```sh
    npm run dev
    ```
 5. Deploy to vercel

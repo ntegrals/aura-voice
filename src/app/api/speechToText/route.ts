@@ -11,6 +11,7 @@ const execAsync = util.promisify(exec);
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  ...(process.env.OPENAI_BASE_URL && { baseURL: process.env.OPENAI_BASE_URL }),
 });
 // This function handles POST requests to the /api/speechToText route
 export async function POST(request: any) {
