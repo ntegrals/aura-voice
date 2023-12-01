@@ -19,9 +19,7 @@ export default function AssistantButton() {
 
   const playAudio = async (input: string) => {
     const CHUNK_SIZE = 1024;
-    const url =
-      "https://api.elevenlabs.io/v1/text-to-speech/nWM88eUzTWbyiJW1K8NX/stream";
-    // 'https://api.elevenlabs.io/v1/text-to-speech/a2uc8mOUbUDoGMdeJwH0/stream';
+    const url = `https://api.elevenlabs.io/v1/text-to-speech/${process.env.NEXT_PUBLIC_ELEVENLABS_VOICE_ID}/stream`;
     const headers = {
       Accept: "audio/mpeg",
       "Content-Type": "application/json",

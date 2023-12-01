@@ -68,6 +68,7 @@ Another thing to keep in mind is perceived wait time. Based on some research, it
    OPENAI_API_KEY="YOUR OPENAI API KEY"
    OPENAI_BASE_URL=(Optional)
    NEXT_PUBLIC_ELEVENLABS_API_KEY="YOUR ELEVENLABS API KEY"
+   NEXT_PUBLIC_ELEVENLABS_VOICE_ID="YOUR ELEVENLABS VOICE ID"
    ```
 
 3. Install the dependencies
