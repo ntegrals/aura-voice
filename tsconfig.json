@@ -28,7 +28,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/app/api/chat"
+    "src/app/api/chat",
+    "next.config.js"
   ],
   "exclude": ["node_modules"]
 }
