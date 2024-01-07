@@ -1,5 +1,5 @@
 import { OpenAI } from "openai";
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import fs from "fs";
 
 const openai = new OpenAI({
@@ -10,7 +10,7 @@ interface RequestBody {
   audio: string;
 }
 
-export async function POST(request: { json: () => Promise<RequestBody> }) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const req = await request.json();
     const base64Audio = req.audio;
@@ -20,7 +20,7 @@ export async function POST(request: { json: () => Promise<RequestBody> }) {
 
     return NextResponse.json({ result: text }, { status: 200 });
   } catch (error) {
-    handleErrorResponse(error);
+    return handleErrorResponse(error);
   }
 }
 
@@ -40,7 +40,7 @@ async function convertAudioToText(audioData: Buffer) {
   }
 }
 
-function handleErrorResponse(error: any) {
+function handleErrorResponse(error: any): NextResponse {
   if (error.response) {
     console.error(error.response.status, error.response.data);
     return NextResponse.json({ error: error.response.data }, { status: 500 });
