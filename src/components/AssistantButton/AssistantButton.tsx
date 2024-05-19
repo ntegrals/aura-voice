@@ -36,7 +36,7 @@ const AssistantButton: React.FC = () => {
   const playAudio = async (input: string): Promise<void> => {
     const CHUNK_SIZE = 1024;
     const url =
-      "https://api.elevenlabs.io/v1/text-to-speech/nWM88eUzTWbyiJW1K8NX/stream";
+      "https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM/stream";
     const headers: Record<string, string> = {
       Accept: "audio/mpeg",
       "Content-Type": "application/json",
