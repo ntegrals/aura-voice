@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef, ChangeEvent } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
-
 interface VoiceSettings {
   stability: number;
   similarity_boost: number;
@@ -22,11 +21,11 @@ const AssistantButton: React.FC = () => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [inputValue, setInputValue] = useState<string>("");
   const [recording, setRecording] = useState<boolean>(false);
+  const [thinking, setThinking] = useState<boolean>(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
     null
   );
   let chunks: BlobPart[] = [];
-
   useEffect(() => {
     if (mediaRecorder && mediaRecorderInitialized) {
       // Additional setup if needed
@@ -34,6 +33,10 @@ const AssistantButton: React.FC = () => {
   }, [mediaRecorder, mediaRecorderInitialized]);
 
   const playAudio = async (input: string): Promise<void> => {
+    console.time("Text-to-Speech");
+    // when handling streaming data, data is often processed in chunks.
+    // chunk is a piece of the data that's processed as a unit.
+    // 1024 bytes at a time
     const CHUNK_SIZE = 1024;
     const url =
       "https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM/stream";
@@ -57,7 +60,6 @@ const AssistantButton: React.FC = () => {
         headers,
         body: JSON.stringify(data),
       });
-
       if (!response.ok) {
         throw new Error("Network response was not ok.");
       }
@@ -66,15 +68,23 @@ const AssistantButton: React.FC = () => {
         (window as any).webkitAudioContext)();
       const source = audioContext.createBufferSource();
 
+      // array buffer contains binary audio data
       const audioBuffer = await response.arrayBuffer();
       const audioBufferDuration = audioBuffer.byteLength / CHUNK_SIZE;
 
+      //once the audio data is decoded, the decoded audio data is passed
+      // to this function as an AudioBuffer
       audioContext.decodeAudioData(audioBuffer, (buffer) => {
         source.buffer = buffer;
+        // this is connecting the BuffferSourceNode to the destination of the AudioContext
         source.connect(audioContext.destination);
+        // this start playing the audio
         source.start();
+        console.timeEnd("Text-to-Speech");
       });
 
+      // start  a timmer that will execute a function after a specified delay
+      // audioBufferDuration * 1000 milliseconds or (audioBufferDuration seconds)
       setTimeout(() => {
         source.stop();
         audioContext.close();
@@ -99,6 +109,7 @@ const AssistantButton: React.FC = () => {
   };
 
   const stopRecording = (): void => {
+    setThinking(true);
     toast("Thinking", {
       duration: 5000,
       icon: "💭",
@@ -121,9 +132,33 @@ const AssistantButton: React.FC = () => {
     <div>
       <motion.div
         onClick={() => {
+          // If assistant is thinking, don't do anything
+          if (thinking) {
+            toast("Please wait for the assistant to finish.", {
+              duration: 5000,
+              icon: "🙌",
+              style: {
+                borderRadius: "10px",
+                background: "#1E1E1E",
+                color: "#F9F9F9",
+                border: "0.5px solid #3B3C3F",
+                fontSize: "14px",
+              },
+              position: "top-right",
+            });
+            //Timer to reset thinking state
+            setTimeout(() => {
+              setThinking(false);
+            }, 1500);
+            return;
+          }
+          // Logic to setup up MediaRecorder event handlers (do it only once)
           if (typeof window !== "undefined" && !mediaRecorderInitialized) {
+            // performance.mark("start-mediarecorder-init");
             setMediaRecorderInitialized(true);
 
+            // 1. handle MediaRecorder event handlers onstart,onstop,ondataavailable
+            // 2. handle error when acessin the microphone
             navigator.mediaDevices
               .getUserMedia({ audio: true })
               .then((stream) => {
@@ -138,7 +173,8 @@ const AssistantButton: React.FC = () => {
                 };
 
                 newMediaRecorder.onstop = async () => {
-                  console.time("Entire function");
+                  //speech-to-text
+                  console.time("Speech To Text");
 
                   const audioBlob = new Blob(chunks, { type: "audio/webm" });
                   const audioUrl = URL.createObjectURL(audioBlob);
@@ -150,6 +186,7 @@ const AssistantButton: React.FC = () => {
 
                   try {
                     const reader = new FileReader();
+                    //convert the audioBlob to base64, will be stored in `reader.result`
                     reader.readAsDataURL(audioBlob);
 
                     reader.onloadend = async function () {
@@ -177,8 +214,8 @@ const AssistantButton: React.FC = () => {
                           );
                         }
 
-                        console.timeEnd("Speech to Text");
-
+                        console.timeEnd("Speech To Text");
+                        console.time("System Response");
                         const completion = await axios.post("/api/chat", {
                           messages: [
                             {
@@ -187,6 +224,7 @@ const AssistantButton: React.FC = () => {
                             },
                           ],
                         });
+                        console.timeEnd("System Response");
 
                         handlePlayButtonClick(completion.data);
                       }
@@ -203,6 +241,7 @@ const AssistantButton: React.FC = () => {
               );
           }
 
+          // if we have reached this point and mediaRecorder hasn't bee initialized, then we throw error
           if (!mediaRecorderInitialized) {
             toast(
               "Please grant access to your microphone. Click the button again to speak.",
@@ -222,6 +261,7 @@ const AssistantButton: React.FC = () => {
             return;
           }
 
+          //
           recording
             ? null
             : toast("Listening - Click again to send", {
