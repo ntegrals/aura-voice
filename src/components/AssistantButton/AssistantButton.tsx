@@ -26,6 +26,7 @@ const AssistantButton: React.FC = () => {
     null
   );
   let chunks: BlobPart[] = [];
+  const [thinking, setThinking] = useState(false);
 
   useEffect(() => {
     if (mediaRecorder && mediaRecorderInitialized) {
@@ -92,14 +93,6 @@ const AssistantButton: React.FC = () => {
     playAudio(input);
   };
 
-  // Define state variables for the result, recording status, assistant thinking and media recorder
-  const [result, setResult] = useState();
-  const [recording, setRecording] = useState(false);
-  const [mediaRecorder, setMediaRecorder] = useState(null);
-  const [thinking, setThinking] = useState(false);
-  // This array will hold the audio data
-  let chunks: any = [];
-  // This useEffect hook sets up the media recorder when the component mounts
 
   // Function to start recording
   const startRecording = () => {
