@@ -91,14 +91,27 @@ const AssistantButton: React.FC = () => {
     playAudio(input);
   };
 
-  const startRecording = (): void => {
+  // Define state variables for the result, recording status, assistant thinking and media recorder
+  const [result, setResult] = useState();
+  const [recording, setRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState(null);
+  const [thinking, setThinking] = useState(false);
+  // This array will hold the audio data
+  let chunks: any = [];
+  // This useEffect hook sets up the media recorder when the component mounts
+
+  // Function to start recording
+  const startRecording = () => {
     if (mediaRecorder && mediaRecorderInitialized) {
       mediaRecorder.start();
       setRecording(true);
     }
   };
 
-  const stopRecording = (): void => {
+  // Function to stop recording
+  const stopRecording = () => {
+    setThinking(true);
+
     toast("Thinking", {
       duration: 5000,
       icon: "💭",
@@ -121,6 +134,27 @@ const AssistantButton: React.FC = () => {
     <div>
       <motion.div
         onClick={() => {
+          
+          // If assistant is thinking, don't do anything
+          if (thinking) {
+            toast("Please wait for the assistant to finish.", {
+              duration: 5000,
+              icon: "🙌",
+              style: {
+                borderRadius: "10px",
+                background: "#1E1E1E",
+                color: "#F9F9F9",
+                border: "0.5px solid #3B3C3F",
+                fontSize: "14px",
+              },
+              position: "top-right",
+            });
+            //Timer to reset thinking state
+            setTimeout(() => {
+              setThinking(false);
+            }, 1500);
+            return;
+          }
           if (typeof window !== "undefined" && !mediaRecorderInitialized) {
             setMediaRecorderInitialized(true);
 
