@@ -1,65 +1,57 @@
-// Import necessary libraries
 import { OpenAI } from "openai";
-import { exec } from "child_process";
+import { NextResponse, NextRequest } from "next/server";
 import fs from "fs";
-import { NextResponse } from "next/server";
-
-// Promisify the exec function from child_process
-const util = require("util");
-const execAsync = util.promisify(exec);
-// Configure the OpenAI API client
 
 const openai = new OpenAI({
+
   apiKey: process.env.OPENAI_API_KEY,
   ...(process.env.OPENAI_BASE_URL && { baseURL: process.env.OPENAI_BASE_URL }),
+
 });
-// This function handles POST requests to the /api/speechToText route
-export async function POST(request: any) {
-  // Parse the request body
-  const req = await request.json();
-  // Extract the audio data from the request body
-  const base64Audio = req.audio;
-  // Convert the Base64 audio data back to a Buffer
-  const audio = Buffer.from(base64Audio, "base64");
+
+interface RequestBody {
+  audio: string;
+}
+
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    // Convert the audio data to text
+    const req = await request.json();
+    const base64Audio = req.audio;
+    const audio = Buffer.from(base64Audio, "base64");
+
     const text = await convertAudioToText(audio);
-    // Return the transcribed text in the response
+
     return NextResponse.json({ result: text }, { status: 200 });
   } catch (error) {
-    // Handle any errors that occur during the request
-    //@ts-ignore
-    if (error.response) {
-      //@ts-ignore
-
-      console.error(error.response.status, error.response.data);
-      //@ts-ignore
-
-      return NextResponse.json({ error: error.response.data }, { status: 500 });
-    } else {
-      //@ts-ignore
-
-      console.error(`Error with OpenAI API request: ${error.message}`);
-      return NextResponse.json(
-        { error: "An error occurred during your request." },
-        { status: 500 }
-      );
-    }
+    return handleErrorResponse(error);
   }
 }
-// This function converts audio data to text using the OpenAI API
-async function convertAudioToText(audioData: any) {
+
+async function convertAudioToText(audioData: Buffer) {
   const outputPath = "/tmp/input.webm";
   fs.writeFileSync(outputPath, audioData);
 
-  // Transcribe the audio
-  const response = await openai.audio.transcriptions.create({
-    file: fs.createReadStream(outputPath),
-    model: "whisper-1",
-  });
-  // Delete the temporary file
-  fs.unlinkSync(outputPath);
-  // The API response contains the transcribed text
-  const transcribedText = response.text;
-  return transcribedText;
+  try {
+    const response = await openai.audio.transcriptions.create({
+      file: fs.createReadStream(outputPath),
+      model: "whisper-1",
+    });
+
+    return response.text;
+  } finally {
+    fs.unlinkSync(outputPath);
+  }
+}
+
+function handleErrorResponse(error: any): NextResponse {
+  if (error.response) {
+    console.error(error.response.status, error.response.data);
+    return NextResponse.json({ error: error.response.data }, { status: 500 });
+  } else {
+    console.error(`Error with OpenAI API request: ${error.message}`);
+    return NextResponse.json(
+      { error: "An error occurred during your request." },
+      { status: 500 }
+    );
+  }
 }
