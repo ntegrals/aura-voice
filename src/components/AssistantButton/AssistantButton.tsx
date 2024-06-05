@@ -1,33 +1,48 @@
 "use client";
-
-// Import necessary libraries
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, ChangeEvent } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 
-// This is the main component of our application
-export default function AssistantButton() {
+interface VoiceSettings {
+  stability: number;
+  similarity_boost: number;
+}
+
+interface TextToSpeechData {
+  text: string;
+  model_id: string;
+  voice_settings: VoiceSettings;
+}
+
+const AssistantButton: React.FC = () => {
   const [mediaRecorderInitialized, setMediaRecorderInitialized] =
-    useState(false);
+    useState<boolean>(false);
+  const [audioPlaying, setAudioPlaying] = useState<boolean>(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [inputValue, setInputValue] = useState<string>("");
+  const [recording, setRecording] = useState<boolean>(false);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
+    null
+  );
+  let chunks: BlobPart[] = [];
 
-  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (mediaRecorder && mediaRecorderInitialized) {
+      // Additional setup if needed
+    }
+  }, [mediaRecorder, mediaRecorderInitialized]);
 
-  const [audioPlaying, setAudioPlaying] = useState(false);
-  const inputRef = useRef(null);
-  const [inputValue, setInputValue] = useState("");
-
-  const playAudio = async (input: string) => {
+  const playAudio = async (input: string): Promise<void> => {
     const CHUNK_SIZE = 1024;
     const url =
       "https://api.elevenlabs.io/v1/text-to-speech/nWM88eUzTWbyiJW1K8NX/stream";
-    // 'https://api.elevenlabs.io/v1/text-to-speech/a2uc8mOUbUDoGMdeJwH0/stream';
-    const headers = {
+    const headers: Record<string, string> = {
       Accept: "audio/mpeg",
       "Content-Type": "application/json",
       "xi-api-key": process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY || "",
     };
-    const data = {
+    const data: TextToSpeechData = {
       text: input,
       model_id: "eleven_multilingual_v2",
       voice_settings: {
@@ -48,12 +63,12 @@ export default function AssistantButton() {
       }
 
       const audioContext = new (window.AudioContext ||
-        // @ts-ignore
-        window.webkitAudioContext)();
+        (window as any).webkitAudioContext)();
       const source = audioContext.createBufferSource();
 
       const audioBuffer = await response.arrayBuffer();
       const audioBufferDuration = audioBuffer.byteLength / CHUNK_SIZE;
+
       audioContext.decodeAudioData(audioBuffer, (buffer) => {
         source.buffer = buffer;
         source.connect(audioContext.destination);
@@ -63,15 +78,15 @@ export default function AssistantButton() {
       setTimeout(() => {
         source.stop();
         audioContext.close();
-        setAudioPlaying(false); // Reset audioPlaying state after audio ends
+        setAudioPlaying(false);
       }, audioBufferDuration * 1000);
     } catch (error) {
       console.error("Error:", error);
-      setAudioPlaying(false); // Reset audioPlaying state on error
+      setAudioPlaying(false);
     }
   };
 
-  const handlePlayButtonClick = (input: string) => {
+  const handlePlayButtonClick = (input: string): void => {
     setAudioPlaying(true);
     playAudio(input);
   };
@@ -88,15 +103,15 @@ export default function AssistantButton() {
   // Function to start recording
   const startRecording = () => {
     if (mediaRecorder && mediaRecorderInitialized) {
-      //@ts-ignore
-
       mediaRecorder.start();
       setRecording(true);
     }
   };
+
   // Function to stop recording
   const stopRecording = () => {
     setThinking(true);
+
     toast("Thinking", {
       duration: 5000,
       icon: "💭",
@@ -110,19 +125,10 @@ export default function AssistantButton() {
       position: "top-right",
     });
     if (mediaRecorder) {
-      //@ts-ignore
-
       mediaRecorder.stop();
       setRecording(false);
     }
   };
-
-  // Framer motion
-  // Different states
-  // intro (x)
-  // idle (auto)
-  // listening
-  // thinking
 
   return (
     <div>
@@ -150,75 +156,80 @@ export default function AssistantButton() {
             return;
           }
           if (typeof window !== "undefined" && !mediaRecorderInitialized) {
-            // Set the init state to true, so we don't init on every click
-            mediaRecorderInitialized ? null : setMediaRecorderInitialized(true);
+            setMediaRecorderInitialized(true);
 
             navigator.mediaDevices
               .getUserMedia({ audio: true })
               .then((stream) => {
                 const newMediaRecorder = new MediaRecorder(stream);
+
                 newMediaRecorder.onstart = () => {
                   chunks = [];
                 };
+
                 newMediaRecorder.ondataavailable = (e) => {
                   chunks.push(e.data);
                 };
+
                 newMediaRecorder.onstop = async () => {
                   console.time("Entire function");
 
                   const audioBlob = new Blob(chunks, { type: "audio/webm" });
                   const audioUrl = URL.createObjectURL(audioBlob);
                   const audio = new Audio(audioUrl);
+
                   audio.onerror = function (err) {
                     console.error("Error playing audio:", err);
                   };
-                  // audio.play();
+
                   try {
                     const reader = new FileReader();
                     reader.readAsDataURL(audioBlob);
+
                     reader.onloadend = async function () {
-                      //@ts-ignore
-                      const base64Audio = reader.result.split(",")[1]; // Remove the data URL prefix
+                      const base64Audio = (reader.result as string).split(
+                        ","
+                      )[1]; // Ensure result is not null or undefined
 
-                      // Speech to text
-                      const response = await fetch("/api/speechToText", {
-                        method: "POST",
-                        headers: {
-                          "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({ audio: base64Audio }),
-                      });
-                      const data = await response.json();
-                      if (response.status !== 200) {
-                        throw (
-                          data.error ||
-                          new Error(
-                            `Request failed with status ${response.status}`
-                          )
-                        );
-                      }
-                      console.timeEnd("Speech to Text");
-
-                      // Get LLM completion
-                      const completion = await axios.post("/api/chat", {
-                        messages: [
-                          {
-                            role: "user",
-                            content: `${data.result} Your answer has to be as consise as possible.`,
+                      if (base64Audio) {
+                        const response = await fetch("/api/speechToText", {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
                           },
-                        ],
-                      });
+                          body: JSON.stringify({ audio: base64Audio }),
+                        });
 
-                      // Convert to speech
-                      handlePlayButtonClick(completion.data);
+                        const data = await response.json();
+
+                        if (response.status !== 200) {
+                          throw (
+                            data.error ||
+                            new Error(
+                              `Request failed with status ${response.status}`
+                            )
+                          );
+                        }
+
+                        console.timeEnd("Speech to Text");
+
+                        const completion = await axios.post("/api/chat", {
+                          messages: [
+                            {
+                              role: "user",
+                              content: `${data.result} Your answer has to be as consise as possible.`,
+                            },
+                          ],
+                        });
+
+                        handlePlayButtonClick(completion.data);
+                      }
                     };
                   } catch (error) {
-                    console.error(error);
-                    //@ts-ignore
-                    alert(error.message);
+                    console.log(error);
                   }
                 };
-                //@ts-ignore
+
                 setMediaRecorder(newMediaRecorder);
               })
               .catch((err) =>
@@ -261,7 +272,6 @@ export default function AssistantButton() {
 
           recording ? stopRecording() : startRecording();
         }}
-        // onClick={recording ? stopRecording : startRecording}
         className="hover:scale-105 ease-in-out duration-500 hover:cursor-pointer text-[70px]"
       >
         <div className="rainbow-container">
@@ -271,4 +281,6 @@ export default function AssistantButton() {
       </motion.div>
     </div>
   );
-}
+};
+
+export default AssistantButton;
