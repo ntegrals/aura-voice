@@ -3,7 +3,10 @@ import { NextResponse, NextRequest } from "next/server";
 import fs from "fs";
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
+
+  apiKey: process.env.OPENAI_API_KEY,
+  ...(process.env.OPENAI_BASE_URL && { baseURL: process.env.OPENAI_BASE_URL }),
+
 });
 
 interface RequestBody {

@@ -35,9 +35,10 @@ const AssistantButton: React.FC = () => {
 
   const playAudio = async (input: string): Promise<void> => {
     const CHUNK_SIZE = 1024;
-    const url =
-      "https://api.elevenlabs.io/v1/text-to-speech/nWM88eUzTWbyiJW1K8NX/stream";
-    const headers: Record<string, string> = {
+
+    const url = `https://api.elevenlabs.io/v1/text-to-speech/${process.env.NEXT_PUBLIC_ELEVENLABS_VOICE_ID}/stream`;
+    const headers = {
+
       Accept: "audio/mpeg",
       "Content-Type": "application/json",
       "xi-api-key": process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY || "",
