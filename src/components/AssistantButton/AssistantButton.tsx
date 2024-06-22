@@ -3,6 +3,9 @@ import React, { useState, useEffect, useRef, ChangeEvent } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
+import { generate, textToSpeechInputStreaming } from "@/app/actions";
+import { readStreamableValue } from "ai/rsc";
+
 interface VoiceSettings {
   stability: number;
   similarity_boost: number;
@@ -25,13 +28,33 @@ const AssistantButton: React.FC = () => {
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
     null
   );
+  const sourceQueue = useRef<AudioBufferSourceNode[]>([]);
+  const base64Queue = useRef<string[]>([]);
+  const nextPlayTime = useRef<number>(0);
+  const audioContext = useRef<AudioContext | null>();
+
   let chunks: BlobPart[] = [];
+
+  const [generation, setGeneration] = useState<string>("");
   useEffect(() => {
     if (mediaRecorder && mediaRecorderInitialized) {
       // Additional setup if needed
     }
+
+    audioContext.current = new (window.AudioContext ||
+      (window as any).webkitAudioContext)();
   }, [mediaRecorder, mediaRecorderInitialized]);
 
+  const processQueue = async () => {
+    while (true) {
+      if (base64Queue.current.length > 0) {
+        console.log("---decoding data--");
+        decode();
+      }
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+  };
+  processQueue();
   const playAudio = async (input: string): Promise<void> => {
     console.time("Text-to-Speech");
     // when handling streaming data, data is often processed in chunks.
@@ -128,9 +151,90 @@ const AssistantButton: React.FC = () => {
     }
   };
 
+  const base64ToArrayBuffer = (
+    base64: string
+  ): { arrayBuffer: ArrayBuffer; length: number } => {
+    const binaryData = atob(base64);
+    const arrayBuffer = new ArrayBuffer(binaryData.length);
+    const uint8Array = new Uint8Array(arrayBuffer);
+
+    for (let i = 0; i < binaryData.length; i++) {
+      uint8Array[i] = binaryData.charCodeAt(i);
+    }
+
+    return { arrayBuffer, length: uint8Array.length };
+  };
+
+  const createAudioBuffer = (
+    arrayBuffer: ArrayBuffer,
+    length: number,
+    audioContext: AudioContext
+  ): AudioBuffer => {
+    const data = new DataView(arrayBuffer);
+
+    //channel=1,number_of_frames=length/2,sample_rate=44100
+    //length gives you total number of bytes
+    //each frame is 2 bytes
+    const audioBuffer = audioContext.createBuffer(1, length / 2, 44100);
+    const channelData = audioBuffer.getChannelData(0);
+
+    // run a pointer algorithm to fetch the frames
+    // what is little-endain??
+    for (let i = 0; i < data.byteLength; i += 2) {
+      // 1 sample point  = 2 bytes
+      const sample = data.getInt16(i, true);
+      // normalize the 16-bit signed integer, which
+      //channelData length is half the size of data...so the pointer needs to be halfed
+      channelData[i / 2] = sample / 32768;
+    }
+
+    return audioBuffer;
+  };
+
+  const decode = () => {
+    if (!audioContext.current) {
+      throw new Error("Audio Context is null");
+    }
+    const base64 = base64Queue.current.shift();
+
+    if (!base64) return;
+
+    const { arrayBuffer, length } = base64ToArrayBuffer(base64);
+    const audioBuffer = createAudioBuffer(
+      arrayBuffer,
+      length,
+      audioContext.current
+    );
+
+    const source = audioContext.current.createBufferSource();
+    source.buffer = audioBuffer;
+    source.connect(audioContext.current.destination);
+    sourceQueue.current.push(source);
+
+    if (nextPlayTime.current < audioContext.current.currentTime) {
+      nextPlayTime.current = audioContext.current.currentTime;
+    }
+
+    schedulePlaySource(source);
+
+    nextPlayTime.current += audioBuffer.duration;
+
+    decode();
+  };
+
+  const schedulePlaySource = (source: AudioBufferSourceNode) => {
+    source.start(nextPlayTime.current);
+    source.addEventListener("ended", () => sourceEnded());
+  };
+
+  const sourceEnded = () => {
+    sourceQueue.current.shift();
+    if (!sourceQueue.current.length) console.log("Audio finished playing");
+  };
+
   return (
     <div>
-      <motion.div
+      {/* <motion.div
         onClick={() => {
           // If assistant is thinking, don't do anything
           if (thinking) {
@@ -284,7 +388,32 @@ const AssistantButton: React.FC = () => {
           <div className="green"></div>
           <div className="pink"></div>
         </div>
-      </motion.div>
+      </motion.div> */}
+      <div>
+        <button
+          onClick={async () => {
+            const { tts } = await textToSpeechInputStreaming(
+              "21m00Tcm4TlvDq8ikWAM",
+              "Why is the sky blue?"
+            );
+            if (tts == null) {
+              console.log("output is null");
+            } else {
+              console.log(tts);
+              for await (const value of readStreamableValue(tts)) {
+                if (value) {
+                  console.log(value);
+                  base64Queue.current.push(value);
+                }
+              }
+            }
+          }}
+        >
+          Ask
+        </button>
+
+        <div>{generation}</div>
+      </div>
     </div>
   );
 };
