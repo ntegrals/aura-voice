@@ -38,6 +38,7 @@
   },
   "devDependencies": {
     "@types/recorder-js": "^1.0.3",
-    "encoding": "^0.1.13"
+    "encoding": "^0.1.13",
+    "prettier": "^3.3.2"
   }
 }

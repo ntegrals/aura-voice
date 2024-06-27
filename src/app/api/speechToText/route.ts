@@ -48,7 +48,7 @@ function handleErrorResponse(error: any): NextResponse {
     console.error(`Error with OpenAI API request: ${error.message}`);
     return NextResponse.json(
       { error: "An error occurred during your request." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
