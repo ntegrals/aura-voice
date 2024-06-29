@@ -222,6 +222,27 @@ const AssistantButton: React.FC = () => {
 				decode();
 		};
 
+		const playChunk = (chunkBase64:string): void => {
+				//convert base64 to array buffer
+				const binaryData = atob(chunkBase64);
+				let len = binaryData.length;
+				let bytes = new Uint8Array(len);
+				for (let i = 0; i < len; i++) {
+						bytes[i] = binaryData.charCodeAt(i);
+				}
+
+				//create an instance of Audio context
+				const audioContext = new (window.AudioContext ||
+						(window as any).webkitAudioContext)();
+				audioContext.decodeAudioData(bytes.buffer, (decodedData) => {
+						//create a new buffer source for each chunk
+						let source = audioContext.createBufferSource();
+						source.buffer = decodedData;
+						source.connect(audioContext.destination);
+						source.start();
+				});
+		}
+
 		const schedulePlaySource = (source: AudioBufferSourceNode) => {
 				source.start(nextPlayTime.current);
 				source.addEventListener("ended", () => sourceEnded());
@@ -234,161 +255,6 @@ const AssistantButton: React.FC = () => {
 
 		return (
 				<div>
-						{/* <motion.div
-        onClick={() => {
-          // If assistant is thinking, don't do anything
-          if (thinking) {
-            toast("Please wait for the assistant to finish.", {
-              duration: 5000,
-              icon: "🙌",
-              style: {
-                borderRadius: "10px",
-                background: "#1E1E1E",
-                color: "#F9F9F9",
-                border: "0.5px solid #3B3C3F",
-                fontSize: "14px",
-              },
-              position: "top-right",
-            });
-            //Timer to reset thinking state
-            setTimeout(() => {
-              setThinking(false);
-            }, 1500);
-            return;
-          }
-          // Logic to setup up MediaRecorder event handlers (do it only once)
-          if (typeof window !== "undefined" && !mediaRecorderInitialized) {
-            // performance.mark("start-mediarecorder-init");
-            setMediaRecorderInitialized(true);
-
-            // 1. handle MediaRecorder event handlers onstart,onstop,ondataavailable
-            // 2. handle error when acessin the microphone
-            navigator.mediaDevices
-              .getUserMedia({ audio: true })
-              .then((stream) => {
-                const newMediaRecorder = new MediaRecorder(stream);
-
-                newMediaRecorder.onstart = () => {
-                  chunks = [];
-                };
-
-                newMediaRecorder.ondataavailable = (e) => {
-                  chunks.push(e.data);
-                };
-
-                newMediaRecorder.onstop = async () => {
-                  //speech-to-text
-                  console.time("Speech To Text");
-
-                  const audioBlob = new Blob(chunks, { type: "audio/webm" });
-                  const audioUrl = URL.createObjectURL(audioBlob);
-                  const audio = new Audio(audioUrl);
-
-                  audio.onerror = function (err) {
-                    console.error("Error playing audio:", err);
-                  };
-
-                  try {
-                    const reader = new FileReader();
-                    //convert the audioBlob to base64, will be stored in `reader.result`
-                    reader.readAsDataURL(audioBlob);
-
-                    reader.onloadend = async function () {
-                      const base64Audio = (reader.result as string).split(
-                        ","
-                      )[1]; // Ensure result is not null or undefined
-
-                      if (base64Audio) {
-                        const response = await fetch("/api/speechToText", {
-                          method: "POST",
-                          headers: {
-                            "Content-Type": "application/json",
-                          },
-                          body: JSON.stringify({ audio: base64Audio }),
-                        });
-
-                        const data = await response.json();
-
-                        if (response.status !== 200) {
-                          throw (
-                            data.error ||
-                            new Error(
-                              `Request failed with status ${response.status}`
-                            )
-                          );
-                        }
-
-                        console.timeEnd("Speech To Text");
-                        console.time("System Response");
-                        const completion = await axios.post("/api/chat", {
-                          messages: [
-                            {
-                              role: "user",
-                              content: `${data.result} Your answer has to be as consise as possible.`,
-                            },
-                          ],
-                        });
-                        console.timeEnd("System Response");
-
-                        handlePlayButtonClick(completion.data);
-                      }
-                    };
-                  } catch (error) {
-                    console.log(error);
-                  }
-                };
-
-                setMediaRecorder(newMediaRecorder);
-              })
-              .catch((err) =>
-                console.error("Error accessing microphone:", err)
-              );
-          }
-
-          // if we have reached this point and mediaRecorder hasn't bee initialized, then we throw error
-          if (!mediaRecorderInitialized) {
-            toast(
-              "Please grant access to your microphone. Click the button again to speak.",
-              {
-                duration: 5000,
-                icon: "🙌",
-                style: {
-                  borderRadius: "10px",
-                  background: "#1E1E1E",
-                  color: "#F9F9F9",
-                  border: "0.5px solid #3B3C3F",
-                  fontSize: "14px",
-                },
-                position: "top-right",
-              }
-            );
-            return;
-          }
-
-          //
-          recording
-            ? null
-            : toast("Listening - Click again to send", {
-                icon: "🟢",
-                style: {
-                  borderRadius: "10px",
-                  background: "#1E1E1E",
-                  color: "#F9F9F9",
-                  border: "0.5px solid #3B3C3F",
-                  fontSize: "14px",
-                },
-                position: "top-right",
-              });
-
-          recording ? stopRecording() : startRecording();
-        }}
-        className="hover:scale-105 ease-in-out duration-500 hover:cursor-pointer text-[70px]"
-      >
-        <div className="rainbow-container">
-          <div className="green"></div>
-          <div className="pink"></div>
-        </div>
-      </motion.div> */}
 						<div>
 								<button
 										onClick={async () => {
@@ -398,12 +264,26 @@ const AssistantButton: React.FC = () => {
 												);
 												if (tts == null) {
 														console.log("output is null");
-												} else {
-														console.log(tts);
-														for await (const value of readStreamableValue(tts)) {
-																if (value) {
-																		console.log(value);
-																		base64Queue.current.push(value);
+												}
+												else {
+														for await (const chunk of readStreamableValue(tts)) {
+																if (!chunk) {
+																		console.error('Chunk is undefined or null');
+																		continue;
+																}
+
+																let chunkObject;
+																try {
+																		chunkObject = JSON.parse(chunk);
+																} catch (error) {
+																		console.error('Error parsing JSON', error);
+																}
+
+																if (chunkObject) {
+																		// Now you can access properties of the chunkObject
+																		if (chunkObject.audio) {
+																				playChunk(chunkObject.audio);
+																		}
 																}
 														}
 												}

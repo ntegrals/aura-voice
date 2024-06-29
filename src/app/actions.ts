@@ -67,7 +67,7 @@ async function* textChunker(input: string) {
 export async function textToSpeechInputStreaming(
 		voiceId: string,
 		input: string,
-) {
+): Promise<{ tts: StreamableValue<string> }>{
 		try {
 				const url = `wss://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream-input?model_id=eleven_turbo_v2`;
 				const streamableAudio = createStreamableValue("");
@@ -106,7 +106,7 @@ export async function textToSpeechInputStreaming(
 								streamableAudio.update(
 										JSON.stringify({
 												audio: data.audio,
-										}),
+										})
 								);
 						}
 				};
