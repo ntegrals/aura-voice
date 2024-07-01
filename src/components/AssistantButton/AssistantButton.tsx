@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { generate, textToSpeechInputStreaming } from "@/app/actions";
 import { readStreamableValue } from "ai/rsc";
+import queueMicrotask from "queue-microtask";
 
 interface VoiceSettings {
 		stability: number;
@@ -239,7 +240,17 @@ const AssistantButton: React.FC = () => {
 						let source = audioContext.createBufferSource();
 						source.buffer = decodedData;
 						source.connect(audioContext.destination);
-						source.start();
+
+						//if nextPlayTime is in the past, set it to the current time
+						if(nextPlayTime.current < audioContext.currentTime){
+								nextPlayTime.current = audioContext.currentTime
+						}
+
+						//Start palaying the chunk at the nextPlayTime
+						source.start(nextPlayTime.current);
+
+						// Schedule the next chunk to playing when this chunk finishes
+						nextPlayTime.current += source.buffer.duration
 				});
 		}
 
