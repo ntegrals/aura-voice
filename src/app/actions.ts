@@ -9,6 +9,34 @@ import {
 } from "ai/rsc";
 import WebSocket from "ws";
 
+type CharTiming = {
+  chars: string[];
+  charStartTimesMs: number[];
+  charDurationsMs: number[];
+};
+
+type ElevenLabsResponse = {
+  audio: string;
+  isFinal: null | boolean;
+  normalizedAlignment: CharTiming;
+  alignment: CharTiming;
+};
+
+async function* generateMock(_input:string){
+		let text = "";
+		const upTo = 10
+		for (let i = 1; i <= upTo; i++) {
+			text += `${i} mississippi${i < upTo ? ", " : ""}`;
+		}
+
+		const chunks = text.split(' ')
+		for (const chunk of chunks) {
+				yield chunk + ' ';
+		}
+}
+
+
+
 async function* generate(input: string): AsyncGenerator<string, void, unknown> {
 		// create a async process that will push the values from textStream to stream
 		const { textStream } = await streamText({
@@ -41,6 +69,8 @@ async function* textChunker(input: string) {
 		let buffer = "";
 
 		for await (const text of generate(input)) {
+		// for await (const text of generateMock(input)) {
+				console.log(`text:${text}`);
 				const isEndOfSentence = splitters.includes(buffer.slice(-1));
 				const ifChunkStartsWithNewSentence = splitters.includes(text[0]);
 
@@ -100,12 +130,15 @@ export async function textToSpeechInputStreaming(
 						event: WebSocket.MessageEvent,
 				): Promise<void> {
 						console.log("---got message");
-						const data = JSON.parse(event.data.toString());
-						console.log(data)
+						const data = JSON.parse(event.data.toString()) as ElevenLabsResponse;
+						// console.log(data)
 						if (data.audio) {
+								const debugData = {...data, audio:''};
+								console.log(debugData)
 								streamableAudio.update(
 										JSON.stringify({
 												audio: data.audio,
+												chars: data.alignment?.chars
 										})
 								);
 						}

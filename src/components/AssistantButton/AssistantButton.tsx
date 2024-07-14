@@ -98,7 +98,7 @@ const AssistantButton: React.FC = () => {
 
 						//once the audio data is decoded, the decoded audio data is passed
 						// to this function as an AudioBuffer
-						audioContext.decodeAudioData(audioBuffer, (buffer) => {
+						await audioContext.decodeAudioData(audioBuffer, (buffer) => {
 								source.buffer = buffer;
 								// this is connecting the BuffferSourceNode to the destination of the AudioContext
 								source.connect(audioContext.destination);
@@ -179,7 +179,6 @@ const AssistantButton: React.FC = () => {
 				const audioBuffer = audioContext.createBuffer(1, length / 2, 44100);
 				const channelData = audioBuffer.getChannelData(0);
 
-				// run a pointer algorithm to fetch the frames
 				// what is little-endain??
 				for (let i = 0; i < data.byteLength; i += 2) {
 						// 1 sample point  = 2 bytes
@@ -223,7 +222,11 @@ const AssistantButton: React.FC = () => {
 				decode();
 		};
 
-		const playChunk = (chunkBase64:string): void => {
+		const playChunkSequentially = async (chunkBase64:string): Promise<void>=> {
+				if (!audioContext.current) {
+						console.error("AudioContext is not initialized");
+						return;
+				}
 				//convert base64 to array buffer
 				const binaryData = atob(chunkBase64);
 				let len = binaryData.length;
@@ -233,24 +236,28 @@ const AssistantButton: React.FC = () => {
 				}
 
 				//create an instance of Audio context
-				const audioContext = new (window.AudioContext ||
-						(window as any).webkitAudioContext)();
-				audioContext.decodeAudioData(bytes.buffer, (decodedData) => {
+				// const audioContext = new (window.AudioContext ||
+				// 		(window as any).webkitAudioContext)();
+				await audioContext.current.decodeAudioData(bytes.buffer, (decodedData) => {
 						//create a new buffer source for each chunk
-						let source = audioContext.createBufferSource();
+						let source = audioContext.current!.createBufferSource();
 						source.buffer = decodedData;
-						source.connect(audioContext.destination);
+						source.connect(audioContext.current!.destination);
 
 						//if nextPlayTime is in the past, set it to the current time
-						if(nextPlayTime.current < audioContext.currentTime){
-								nextPlayTime.current = audioContext.currentTime
+						if(nextPlayTime.current < audioContext.current!.currentTime){
+								nextPlayTime.current = audioContext.current!.currentTime
 						}
 
-						//Start palaying the chunk at the nextPlayTime
+						//Start playing the chunk at the nextPlayTime
 						source.start(nextPlayTime.current);
 
 						// Schedule the next chunk to playing when this chunk finishes
 						nextPlayTime.current += source.buffer.duration
+
+						return new Promise((resolve)=>{
+								source.onended = () => resolve(1);
+						})
 				});
 		}
 
@@ -293,7 +300,9 @@ const AssistantButton: React.FC = () => {
 																if (chunkObject) {
 																		// Now you can access properties of the chunkObject
 																		if (chunkObject.audio) {
-																				playChunk(chunkObject.audio);
+																				console.log(`----chunk-start:${chunkObject.chars}----`)
+																				await  playChunkSequentially(chunkObject.audio);
+																				console.log(`----chunk-end:${chunkObject.chars} ----`)
 																		}
 																}
 														}
