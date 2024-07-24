@@ -152,75 +152,8 @@ const AssistantButton: React.FC = () => {
 				}
 		};
 
-		const base64ToArrayBuffer = (
-				base64: string,
-		): { arrayBuffer: ArrayBuffer; length: number } => {
-				const binaryData = atob(base64);
-				const arrayBuffer = new ArrayBuffer(binaryData.length);
-				const uint8Array = new Uint8Array(arrayBuffer);
 
-				for (let i = 0; i < binaryData.length; i++) {
-						uint8Array[i] = binaryData.charCodeAt(i);
-				}
 
-				return { arrayBuffer, length: uint8Array.length };
-		};
-
-		const createAudioBuffer = (
-				arrayBuffer: ArrayBuffer,
-				length: number,
-				audioContext: AudioContext,
-		): AudioBuffer => {
-				const data = new DataView(arrayBuffer);
-
-				//channel=1,number_of_frames=length/2,sample_rate=44100
-				//length gives you total number of bytes
-				//each frame is 2 bytes
-				const audioBuffer = audioContext.createBuffer(1, length / 2, 44100);
-				const channelData = audioBuffer.getChannelData(0);
-
-				// what is little-endain??
-				for (let i = 0; i < data.byteLength; i += 2) {
-						// 1 sample point  = 2 bytes
-						const sample = data.getInt16(i, true);
-						// normalize the 16-bit signed integer, which
-						//channelData length is half the size of data...so the pointer needs to be halfed
-						channelData[i / 2] = sample / 32768;
-				}
-
-				return audioBuffer;
-		};
-
-		const decode = () => {
-				if (!audioContext.current) {
-						throw new Error("Audio Context is null");
-				}
-				const base64 = base64Queue.current.shift();
-
-				if (!base64) return;
-
-				const { arrayBuffer, length } = base64ToArrayBuffer(base64);
-				const audioBuffer = createAudioBuffer(
-						arrayBuffer,
-						length,
-						audioContext.current,
-				);
-
-				const source = audioContext.current.createBufferSource();
-				source.buffer = audioBuffer;
-				source.connect(audioContext.current.destination);
-				sourceQueue.current.push(source);
-
-				if (nextPlayTime.current < audioContext.current.currentTime) {
-						nextPlayTime.current = audioContext.current.currentTime;
-				}
-
-				schedulePlaySource(source);
-
-				nextPlayTime.current += audioBuffer.duration;
-
-				decode();
-		};
 
 		const playChunkSequentially = async (chunkBase64:string): Promise<void>=> {
 				if (!audioContext.current) {
@@ -235,9 +168,6 @@ const AssistantButton: React.FC = () => {
 						bytes[i] = binaryData.charCodeAt(i);
 				}
 
-				//create an instance of Audio context
-				// const audioContext = new (window.AudioContext ||
-				// 		(window as any).webkitAudioContext)();
 				await audioContext.current.decodeAudioData(bytes.buffer, (decodedData) => {
 						//create a new buffer source for each chunk
 						let source = audioContext.current!.createBufferSource();
@@ -300,9 +230,7 @@ const AssistantButton: React.FC = () => {
 																if (chunkObject) {
 																		// Now you can access properties of the chunkObject
 																		if (chunkObject.audio) {
-																				console.log(`----chunk-start:${chunkObject.chars}----`)
 																				await  playChunkSequentially(chunkObject.audio);
-																				console.log(`----chunk-end:${chunkObject.chars} ----`)
 																		}
 																}
 														}
