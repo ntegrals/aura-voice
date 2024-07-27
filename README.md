@@ -3,7 +3,7 @@
 <br />
 <div align="center">
 
-<h3 align="center">Say Hi to Aura 👋</h3>
+<h3 align="center">Say hi to Aura 👋</h3>
 
   <p align="center">
     Aura is a smart voice assistant optimized for low latency responses. Uses Vercel Edge Functions, Whisper Speech Recognition, GPT-4o and Eleven Labs TTS streaming.
@@ -16,7 +16,7 @@
     <a href="https://github.com/ntegrals/voice-assistant/issues">Request Feature</a>
   </p>
 </div>
-<a href="https://github.com/ntegrals/voice-assistant">
+<a href="https://github.com/ntegrals/aura-voice">
     <img src="images/header.png" alt="Logo">
   </a>
 
@@ -28,7 +28,7 @@
 
 ## Demo
 
-You can test the voice assistant here: [https://heyassistant.co](https://heyassistant.co)
+You can test the Aura here: [https://heyassistant.co](https://heyassistant.co)
 
 ## Motivation
 
@@ -43,7 +43,7 @@ I would love to for this repo to become the go-to place for people who want to b
 The latency of the voice assistant is the most important factor for a good user experience. Currently there are 3 main factors that contribute to the latency:
 
 - The time it takes to transcribe the audio (Via Whisper Speech Recognition)
-- The time it takes to generate the response (Via GPT-3.5 Turbo)
+- The time it takes to generate the response (Via GPT-4o Mini)
 - The time it takes to stream the speech response (Via Eleven Labs TTS)
 
 Based on some tests I've done, the speech generation takes the most time. The longer the text to be synthesized, the longer it takes to generate the speech. The latency of the speech generation is also the most unpredictable.
@@ -57,7 +57,7 @@ Another thing to keep in mind is perceived wait time. Based on some research, it
 1. Clone the repo
 
    ```sh
-   git clone https://github.com/ntegrals/voice-assistant
+   git clone https://github.com/ntegrals/aura-voice
    ```
 
 2. Get an API Key from [https://openai.com/](https://openai.com/) and [https://elevenlabs.com/](https://elevenlabs.com/)
