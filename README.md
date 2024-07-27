@@ -17,7 +17,7 @@
   </p>
 </div>
 <a href="https://github.com/ntegrals/aura-voice">
-    <img src="images/header.png" alt="Logo">
+    <img src=".assets//header.png" alt="Logo">
   </a>
 
 ## Features
@@ -92,7 +92,7 @@ You can send me an email to get in touch: j.schoen@mail.com or message me on Twi
 If you'd just want to give something back, I've got a Buy Me A Coffee account:
 
 <a href="https://www.buymeacoffee.com/ntegrals">
-<img src="images/buymeacoffee.png" alt="buymeacoffee" width="192">
+<img src=".assets/buymeacoffee.png" alt="buymeacoffee" width="192">
 </a>
 
 Thanks and have an awesome day 👋
