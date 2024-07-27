@@ -3,10 +3,10 @@
 <br />
 <div align="center">
 
-<h3 align="center">Voice Assistant for the Web</h3>
+<h3 align="center">Say Hi to Aura 👋</h3>
 
   <p align="center">
-    A smart voice assistant optimized for low latency responses. Uses Vercel Edge Functions, Whisper Speech Recognition, GPT-4o and Eleven Labs TTS streaming.
+    Aura is a smart voice assistant optimized for low latency responses. Uses Vercel Edge Functions, Whisper Speech Recognition, GPT-4o and Eleven Labs TTS streaming.
     <br />
     <br />
     <a href="https://heyassistant.co">View Demo</a>
