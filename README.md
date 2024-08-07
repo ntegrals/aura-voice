@@ -11,9 +11,9 @@
     <br />
     <a href="https://heyassistant.co">View Demo</a>
     ·
-    <a href="https://github.com/ntegrals/voice-assistant/issues">Report Bug</a>
+    <a href="https://github.com/ntegrals/aura-voice/issues">Report Bug</a>
     ·
-    <a href="https://github.com/ntegrals/voice-assistant/issues">Request Feature</a>
+    <a href="https://github.com/ntegrals/aura-voice/issues">Request Feature</a>
   </p>
 </div>
 <a href="https://github.com/ntegrals/aura-voice">
