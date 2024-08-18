@@ -3,9 +3,10 @@ import React, { useState, useEffect, useRef, ChangeEvent } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
-import { generate, textToSpeechInputStreaming } from "@/app/actions";
+import {textToSpeechInputStreaming,endConversation} from "@/app/actions";
+import { useAudioRecorder } from "@/lib/hooks/useAudioRecorder";
 import { readStreamableValue } from "ai/rsc";
-import queueMicrotask from "queue-microtask";
+import {speechToText} from "@/lib/utils/speech-to-text";
 
 interface VoiceSettings {
 		stability: number;
@@ -19,140 +20,23 @@ interface TextToSpeechData {
 }
 
 const AssistantButton: React.FC = () => {
-		const [mediaRecorderInitialized, setMediaRecorderInitialized] =
-				useState<boolean>(false);
-		const [audioPlaying, setAudioPlaying] = useState<boolean>(false);
-		const inputRef = useRef<HTMLInputElement | null>(null);
-		const [inputValue, setInputValue] = useState<string>("");
-		const [recording, setRecording] = useState<boolean>(false);
-		const [thinking, setThinking] = useState<boolean>(false);
-		const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
-				null,
-		);
-		const sourceQueue = useRef<AudioBufferSourceNode[]>([]);
-		const base64Queue = useRef<string[]>([]);
 		const nextPlayTime = useRef<number>(0);
 		const audioContext = useRef<AudioContext | null>();
 
-		let chunks: BlobPart[] = [];
-
 		const [generation, setGeneration] = useState<string>("");
 		useEffect(() => {
-				if (mediaRecorder && mediaRecorderInitialized) {
-						// Additional setup if needed
-				}
-
 				audioContext.current = new (window.AudioContext ||
 						(window as any).webkitAudioContext)();
-		}, [mediaRecorder, mediaRecorderInitialized]);
-
-		const processQueue = async () => {
-				while (true) {
-						if (base64Queue.current.length > 0) {
-								console.log("---decoding data--");
-								decode();
-						}
-						await new Promise((resolve) => setTimeout(resolve, 0));
+				window.addEventListener("beforeunload", endConversation)
+				window.addEventListener("unload", endConversation)
+				return () => {
+						window.removeEventListener("beforeunload", endConversation)
+						window.removeEventListener("unload", endConversation)
 				}
-		};
-		processQueue();
-		const playAudio = async (input: string): Promise<void> => {
-				console.time("Text-to-Speech");
-				// when handling streaming data, data is often processed in chunks.
-				// chunk is a piece of the data that's processed as a unit.
-				// 1024 bytes at a time
-				const CHUNK_SIZE = 1024;
-				const url =
-						"https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM/stream";
-				const headers: Record<string, string> = {
-						Accept: "audio/mpeg",
-						"Content-Type": "application/json",
-						"xi-api-key": process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY || "",
-				};
-				const data: TextToSpeechData = {
-						text: input,
-						model_id: "eleven_multilingual_v2",
-						voice_settings: {
-								stability: 0.5,
-								similarity_boost: 0.5,
-						},
-				};
 
-				try {
-						const response = await fetch(url, {
-								method: "POST",
-								headers,
-								body: JSON.stringify(data),
-						});
-						if (!response.ok) {
-								throw new Error("Network response was not ok.");
-						}
+		}, []);
 
-						const audioContext = new (window.AudioContext ||
-								(window as any).webkitAudioContext)();
-						const source = audioContext.createBufferSource();
-
-						// array buffer contains binary audio data
-						const audioBuffer = await response.arrayBuffer();
-						const audioBufferDuration = audioBuffer.byteLength / CHUNK_SIZE;
-
-						//once the audio data is decoded, the decoded audio data is passed
-						// to this function as an AudioBuffer
-						await audioContext.decodeAudioData(audioBuffer, (buffer) => {
-								source.buffer = buffer;
-								// this is connecting the BuffferSourceNode to the destination of the AudioContext
-								source.connect(audioContext.destination);
-								// this start playing the audio
-								source.start();
-								console.timeEnd("Text-to-Speech");
-						});
-
-						// start  a timmer that will execute a function after a specified delay
-						// audioBufferDuration * 1000 milliseconds or (audioBufferDuration seconds)
-						setTimeout(() => {
-								source.stop();
-								audioContext.close();
-								setAudioPlaying(false);
-						}, audioBufferDuration * 1000);
-				} catch (error) {
-						console.error("Error:", error);
-						setAudioPlaying(false);
-				}
-		};
-
-		const handlePlayButtonClick = (input: string): void => {
-				setAudioPlaying(true);
-				playAudio(input);
-		};
-
-		const startRecording = (): void => {
-				if (mediaRecorder && mediaRecorderInitialized) {
-						mediaRecorder.start();
-						setRecording(true);
-				}
-		};
-
-		const stopRecording = (): void => {
-				setThinking(true);
-				toast("Thinking", {
-						duration: 5000,
-						icon: "💭",
-						style: {
-								borderRadius: "10px",
-								background: "#1E1E1E",
-								color: "#F9F9F9",
-								border: "0.5px solid #3B3C3F",
-								fontSize: "14px",
-						},
-						position: "top-right",
-				});
-				if (mediaRecorder) {
-						mediaRecorder.stop();
-						setRecording(false);
-				}
-		};
-
-
+		const {isRecording,startRecording,stopRecording,audioChunks,isMediaRecorderInitialized}= useAudioRecorder()
 
 
 		const playChunkSequentially = async (chunkBase64:string): Promise<void>=> {
@@ -160,6 +44,7 @@ const AssistantButton: React.FC = () => {
 						console.error("AudioContext is not initialized");
 						return;
 				}
+
 				//convert base64 to array buffer
 				const binaryData = atob(chunkBase64);
 				let len = binaryData.length;
@@ -168,6 +53,9 @@ const AssistantButton: React.FC = () => {
 						bytes[i] = binaryData.charCodeAt(i);
 				}
 
+				// The playChunkSequentially function waits for audioContext.current.decodeAudioData to finish decoding the audio data
+				// The callback function provided to decodeAudioData sets up the audio source and returns a promise that resolves when source.onended is triggered.
+				// This ensures that playChunkSequentially waits for the current chunk to finish playing before proceeding.
 				await audioContext.current.decodeAudioData(bytes.buffer, (decodedData) => {
 						//create a new buffer source for each chunk
 						let source = audioContext.current!.createBufferSource();
@@ -191,53 +79,87 @@ const AssistantButton: React.FC = () => {
 				});
 		}
 
-		const schedulePlaySource = (source: AudioBufferSourceNode) => {
-				source.start(nextPlayTime.current);
-				source.addEventListener("ended", () => sourceEnded());
-		};
+		  const textToSpeechHandler = async (userPrompt:string) => {
+					console.log('calling textToSpeechHandler')
+					const { tts } = await textToSpeechInputStreaming(
+					  "21m00Tcm4TlvDq8ikWAM",
+					  userPrompt
+					);
+				  console.log('called textToSpeechHandler')
+					if (tts == null) {
+					  console.log("output is null");
+					} else {
+					  for await (const chunk of readStreamableValue(tts)) {
+						if (!chunk) {
+						  console.error("Chunk is undefined or null");
+						  continue;
+						}
 
-		const sourceEnded = () => {
-				sourceQueue.current.shift();
-				if (!sourceQueue.current.length) console.log("Audio finished playing");
-		};
+						let chunkObject;
+						try {
+						  chunkObject = JSON.parse(chunk);
+						} catch (error) {
+						  console.error("Error parsing JSON", error);
+						}
 
+						if (chunkObject && chunkObject.audio) {
+						  await playChunkSequentially(chunkObject.audio);
+						}
+					  }
+					}
+				  };
+
+
+		const handleRecordingComplete = async (audioChunks:BlobPart[]): Promise<void> => {
+				console.log('handelRecordingComplete')
+				console.log('audioChunks:',audioChunks.length)
+				// combine multiple blob parts into a single blob
+				const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+
+				// test that blob is playable by creating a URL and playing with an audio element
+				const audioUrl = URL.createObjectURL(audioBlob);
+				const audio = new Audio(audioUrl);
+				audio.onerror = (error) => {
+						console.error('audio error:',error)
+				}
+
+				// pass the blob to the server for speech-to-text conversion
+				const text = await speechToText(audioBlob)
+				console.log('text:',text)
+				await textToSpeechHandler(text)
+		}
+
+
+
+		const onClickHandler = async () => {
+				if(!isMediaRecorderInitialized){
+						console.log('media recorder not initialized')
+						return
+				}
+
+				if(isRecording){
+						const audioChunks = await  stopRecording();
+						await handleRecordingComplete(audioChunks)
+				}else {
+						startRecording();
+				}
+		}
+
+		const dummy = async () => {console.log('dummy handler pressed')}
 		return (
 				<div>
 						<div>
 								<button
-										onClick={async () => {
-												const { tts } = await textToSpeechInputStreaming(
-														"21m00Tcm4TlvDq8ikWAM",
-														"Why is the sky blue?",
-												);
-												if (tts == null) {
-														console.log("output is null");
-												}
-												else {
-														for await (const chunk of readStreamableValue(tts)) {
-																if (!chunk) {
-																		console.error('Chunk is undefined or null');
-																		continue;
-																}
-
-																let chunkObject;
-																try {
-																		chunkObject = JSON.parse(chunk);
-																} catch (error) {
-																		console.error('Error parsing JSON', error);
-																}
-
-																if (chunkObject) {
-																		// Now you can access properties of the chunkObject
-																		if (chunkObject.audio) {
-																				await  playChunkSequentially(chunkObject.audio);
-																		}
-																}
-														}
-												}
-										}}
+										onClick={onClickHandler}
 								>
 										Ask
+								</button>
+
+
+								<button
+										onClick={endConversation}
+								>
+										End Conversation
 								</button>
 
 								<div>{generation}</div>

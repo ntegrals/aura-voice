@@ -1,6 +1,6 @@
 "use server";
 
-import { streamText } from "ai";
+import {CoreSystemMessage, CoreUserMessage, streamText} from "ai";
 import { openai } from "@ai-sdk/openai";
 import {
 		StreamableValue,
@@ -22,6 +22,10 @@ type ElevenLabsResponse = {
   alignment: CharTiming;
 };
 
+const messages: (CoreUserMessage|CoreSystemMessage)[] =[]
+let socket: WebSocket | null = null;
+let conversationEnded = false;
+
 async function* generateMock(_input:string){
 		let text = "";
 		const upTo = 10
@@ -39,14 +43,27 @@ async function* generateMock(_input:string){
 
 async function* generate(input: string): AsyncGenerator<string, void, unknown> {
 		// create a async process that will push the values from textStream to stream
+		const userMessage: CoreUserMessage = {
+				role: "user",
+				content: input,
+		};
+		messages.push(userMessage)
 		const { textStream } = await streamText({
 				model: openai("gpt-3.5-turbo"),
-				prompt: input,
+				// prompt: input + "Your answer has to sound human-like, easy to understand and not too technical.",
+				messages: messages
 		});
-
+		let completeResponse = "";
 		for await (const delta of textStream) {
+				completeResponse += delta;
 				yield delta;
 		}
+		const systemMessage: CoreSystemMessage = {
+				role: "system",
+				content: completeResponse,
+		};
+		messages.push(systemMessage)
+		console.log(completeResponse);
 }
 
 // async function* textChunker(chunks: AsyncIterable<string>) {
@@ -96,36 +113,34 @@ async function* textChunker(input: string) {
 
 export async function textToSpeechInputStreaming(
 		voiceId: string,
-		input: string,
+		userPrompt: string,
 ): Promise<{ tts: StreamableValue<string> }>{
 		try {
+				conversationEnded = false;
 				const url = `wss://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream-input?model_id=eleven_turbo_v2`;
 				const streamableAudio = createStreamableValue("");
 				console.log(url);
-				const socket: WebSocket = new WebSocket(url);
-				socket.onopen = async function (_event: WebSocket.Event): Promise<void> {
-						console.log("open event socket");
-						const bosMessage = {
-								text: " ",
-								voice_settings: {
-										stability: 0.5,
-										similarity_boost: 0.5,
-								},
-								xi_api_key: process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY || "",
+				console.log('userPrompt',userPrompt)
+				if(!socket || socket.readyState === WebSocket.CLOSED){
+						socket = new WebSocket(url);
+						socket.onopen = async function (_event: WebSocket.Event): Promise<void> {
+								console.log("open event socket");
+								const bosMessage = {
+										text: " ",
+										voice_settings: {
+												stability: 0.5,
+												similarity_boost: 0.5,
+										},
+										xi_api_key: process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY || "",
+								};
+								if(socket && socket.readyState === WebSocket.OPEN){
+										socket.send(JSON.stringify(bosMessage));
+										// okay... so it seems that we may be closing the socket, before we are finished receiving all the bytes
+										// const eosMessage = { text: "" };
+										// socket.send(JSON.stringify(eosMessage));
+								}
 						};
-						socket.send(JSON.stringify(bosMessage));
-						for await (const chunk of textChunker(input)) {
-								socket.send(
-										JSON.stringify({
-												text: chunk,
-												try_trigger_generation: true,
-										}),
-								);
-						}
-						// okay... so it seems that we may be closing the socket, before we are finished receiving all the bytes
-						const eosMessage = { text: "" };
-						socket.send(JSON.stringify(eosMessage));
-				};
+				}
 				socket.onmessage = async function (
 						event: WebSocket.MessageEvent,
 				): Promise<void> {
@@ -159,9 +174,28 @@ export async function textToSpeechInputStreaming(
 								streamableAudio.done();
 						}
 				};
+
+				for await (const chunk of textChunker(userPrompt)) {
+						socket.send(
+								JSON.stringify({
+										text: chunk,
+										try_trigger_generation: true,
+								}),
+						);
+				}
 				return { tts: streamableAudio.value };
 		} catch (e) {
 				console.log(e);
+				console.log('some error occurred in textToSpeechInputStreaming')
 				return { tts: null };
+		}
+}
+
+export async function endConversation(){
+		if(socket && socket.readyState === WebSocket.OPEN){
+				const eosMessage = { text: "" };
+				// socket.send(JSON.stringify(eosMessage));
+				// conversationEnded = true;
+				// console.log('connection closed cleanly')
 		}
 }

@@ -1,11 +1,10 @@
-// src/lib/utils/processAudioAndConvertToText.ts
 
 /**
  * Processes an audio blob by converting it to base64 and sending it to a server endpoint for speech-to-text conversion.
  * @param audioBlob The audio blob to process.
  * @returns A promise that resolves with the speech-to-text conversion result.
  */
-export const processAudioAndConvertToText = async (audioBlob: Blob): Promise<string> => {
+export const speechToText = async (audioBlob: Blob): Promise<string> => {
   try {
     const base64Audio = await blobToBase64(audioBlob);
     const response = await fetch("/api/speechToText", {

@@ -4,7 +4,7 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import {useAudioRecorder} from "@/lib/hooks/useAudioRecorder";
-import {processAudioAndConvertToText,blobToBase64} from "@/lib/utils/speech-to-text";
+import {speechToText,blobToBase64} from "@/lib/utils/speech-to-text";
 import {useTextToSpeech} from "@/lib/hooks/useTextToSpeech";
 
 interface VoiceSettings {
