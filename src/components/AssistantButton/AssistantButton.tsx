@@ -7,7 +7,6 @@ import {textToSpeechInputStreaming} from "@/app/actions";
 import { useAudioRecorder } from "@/lib/hooks/useAudioRecorder";
 import { readStreamableValue } from "ai/rsc";
 import {speechToText} from "@/lib/utils/speech-to-text";
-import {resolve} from "dns";
 
 interface VoiceSettings {
 		stability: number;
