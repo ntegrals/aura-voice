@@ -7,6 +7,7 @@ import {textToSpeechInputStreaming} from "@/app/actions";
 import { useAudioRecorder } from "@/lib/hooks/useAudioRecorder";
 import { readStreamableValue } from "ai/rsc";
 import {speechToText} from "@/lib/utils/speech-to-text";
+import {resolve} from "dns";
 
 interface VoiceSettings {
 		stability: number;
@@ -32,7 +33,13 @@ const AssistantButton: React.FC = () => {
 
 		const {isRecording,startRecording,stopRecording,audioChunks,isMediaRecorderInitialized}= useAudioRecorder()
 
+		const decodeAudioDataAsync = (audioContext: AudioContext, audioData: ArrayBuffer): Promise<AudioBuffer> => {
+		  return new Promise((resolve, reject) => {
+			audioContext.decodeAudioData(audioData, resolve, reject);
+		  });
+		};
 
+		// play audio chunks sequentially
 		const playChunkSequentially = async (chunkBase64:string): Promise<void>=> {
 				if (!audioContext.current) {
 						console.error("AudioContext is not initialized");
@@ -50,7 +57,8 @@ const AssistantButton: React.FC = () => {
 				// The playChunkSequentially function waits for audioContext.current.decodeAudioData to finish decoding the audio data
 				// The callback function provided to decodeAudioData sets up the audio source and returns a promise that resolves when source.onended is triggered.
 				// This ensures that playChunkSequentially waits for the current chunk to finish playing before proceeding.
-				await audioContext.current.decodeAudioData(bytes.buffer, (decodedData) => {
+				try{
+						const decodedData = await decodeAudioDataAsync(audioContext.current, bytes.buffer);
 						//create a new buffer source for each chunk
 						let source = audioContext.current!.createBufferSource();
 						source.buffer = decodedData;
@@ -68,9 +76,12 @@ const AssistantButton: React.FC = () => {
 						nextPlayTime.current += source.buffer.duration
 
 						return new Promise((resolve)=>{
-								source.onended = () => resolve(1);
+								source.onended = () => resolve();
 						})
-				});
+				}catch(error){
+						console.error("Error decoding audio data", error)
+				}
+
 		}
 
 		  const textToSpeechHandler = async (userPrompt:string) => {
@@ -132,6 +143,7 @@ const AssistantButton: React.FC = () => {
 				}
 
 				if(isRecording){
+						console.log('stop recording',isRecording)
 						const audioChunks = await  stopRecording();
 						await handleRecordingComplete(audioChunks)
 				}else {
