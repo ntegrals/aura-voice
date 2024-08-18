@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, ChangeEvent } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
-import {textToSpeechInputStreaming,endConversation} from "@/app/actions";
+import {textToSpeechInputStreaming} from "@/app/actions";
 import { useAudioRecorder } from "@/lib/hooks/useAudioRecorder";
 import { readStreamableValue } from "ai/rsc";
 import {speechToText} from "@/lib/utils/speech-to-text";
@@ -27,12 +27,6 @@ const AssistantButton: React.FC = () => {
 		useEffect(() => {
 				audioContext.current = new (window.AudioContext ||
 						(window as any).webkitAudioContext)();
-				window.addEventListener("beforeunload", endConversation)
-				window.addEventListener("unload", endConversation)
-				return () => {
-						window.removeEventListener("beforeunload", endConversation)
-						window.removeEventListener("unload", endConversation)
-				}
 
 		}, []);
 
@@ -153,13 +147,6 @@ const AssistantButton: React.FC = () => {
 										onClick={onClickHandler}
 								>
 										Ask
-								</button>
-
-
-								<button
-										onClick={endConversation}
-								>
-										End Conversation
 								</button>
 
 								<div>{generation}</div>

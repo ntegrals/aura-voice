@@ -23,8 +23,6 @@ type ElevenLabsResponse = {
 };
 
 const messages: (CoreUserMessage|CoreSystemMessage)[] =[]
-let socket: WebSocket | null = null;
-let conversationEnded = false;
 
 async function* generateMock(_input:string){
 		let text = "";
@@ -116,31 +114,37 @@ export async function textToSpeechInputStreaming(
 		userPrompt: string,
 ): Promise<{ tts: StreamableValue<string> }>{
 		try {
-				conversationEnded = false;
 				const url = `wss://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream-input?model_id=eleven_turbo_v2`;
 				const streamableAudio = createStreamableValue("");
 				console.log(url);
 				console.log('userPrompt',userPrompt)
-				if(!socket || socket.readyState === WebSocket.CLOSED){
-						socket = new WebSocket(url);
-						socket.onopen = async function (_event: WebSocket.Event): Promise<void> {
-								console.log("open event socket");
-								const bosMessage = {
-										text: " ",
-										voice_settings: {
-												stability: 0.5,
-												similarity_boost: 0.5,
-										},
-										xi_api_key: process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY || "",
-								};
-								if(socket && socket.readyState === WebSocket.OPEN){
-										socket.send(JSON.stringify(bosMessage));
-										// okay... so it seems that we may be closing the socket, before we are finished receiving all the bytes
-										// const eosMessage = { text: "" };
-										// socket.send(JSON.stringify(eosMessage));
-								}
+				const socket = new WebSocket(url);
+
+				socket.onopen = async function (_event: WebSocket.Event): Promise<void> {
+						console.log("open event socket");
+						const bosMessage = {
+								text: " ",
+								voice_settings: {
+										stability: 0.5,
+										similarity_boost: 0.5,
+								},
+								xi_api_key: process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY || "",
 						};
-				}
+						socket.send(JSON.stringify(bosMessage));
+
+						for await (const chunk of textChunker(userPrompt)) {
+								socket.send(
+										JSON.stringify({
+												text: chunk,
+												try_trigger_generation: true,
+										}),
+								);
+						}
+						// okay... so it seems that we may be closing the socket, before we are finished receiving all the bytes
+						const eosMessage = { text: "" };
+						socket.send(JSON.stringify(eosMessage));
+				};
+
 				socket.onmessage = async function (
 						event: WebSocket.MessageEvent,
 				): Promise<void> {
@@ -175,14 +179,6 @@ export async function textToSpeechInputStreaming(
 						}
 				};
 
-				for await (const chunk of textChunker(userPrompt)) {
-						socket.send(
-								JSON.stringify({
-										text: chunk,
-										try_trigger_generation: true,
-								}),
-						);
-				}
 				return { tts: streamableAudio.value };
 		} catch (e) {
 				console.log(e);
@@ -191,11 +187,3 @@ export async function textToSpeechInputStreaming(
 		}
 }
 
-export async function endConversation(){
-		if(socket && socket.readyState === WebSocket.OPEN){
-				const eosMessage = { text: "" };
-				// socket.send(JSON.stringify(eosMessage));
-				// conversationEnded = true;
-				// console.log('connection closed cleanly')
-		}
-}
