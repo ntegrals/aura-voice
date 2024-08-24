@@ -102,7 +102,6 @@ const AssistantButton: React.FC = () => {
 
         //Text to speech (evleven labs)
         // Handle the response from the chat API
-        console.log(completion.data); // Placeholder for actual handling logic
       } catch (error) {
         console.error("Error processing audio for speech to text:", error);
       }

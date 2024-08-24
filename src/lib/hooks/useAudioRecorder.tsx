@@ -16,13 +16,10 @@ export const useAudioRecorder = () : UseAudioRecorderReturn => {
 
 
     useEffect(() => {
-    console.log('useEffect from useAudioRecorder');
     if (navigator.mediaDevices && !mediaRecorder) {
       navigator.mediaDevices.getUserMedia({ audio: true }).then((stream: MediaStream): void => {
         const newMediaRecorder = new MediaRecorder(stream);
         newMediaRecorder.ondataavailable = (event) => {
-          console.log('adding chunks...');
-          console.log(event)
           audioChunksRef.current.push(event.data);
         };
 
@@ -38,8 +35,6 @@ export const useAudioRecorder = () : UseAudioRecorderReturn => {
 
   const startRecording = () => {
     if (isMediaRecorderInitialized && mediaRecorder) {
-      console.log('start recording')
-      console.log(mediaRecorder)
       mediaRecorder.start();
       setIsRecording(true);
       audioChunksRef.current = []
@@ -50,7 +45,6 @@ export const useAudioRecorder = () : UseAudioRecorderReturn => {
     return new Promise((resolve)=>{
       if (mediaRecorder) {
         mediaRecorder.onstop = () => {
-          console.log('chunks:', audioChunksRef.current.length)
           resolve(audioChunksRef.current)
         }
         mediaRecorder.stop();

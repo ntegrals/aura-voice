@@ -61,7 +61,6 @@ async function* generate(input: string): AsyncGenerator<string, void, unknown> {
 				content: completeResponse,
 		};
 		messages.push(systemMessage)
-		console.log(completeResponse);
 }
 
 // async function* textChunker(chunks: AsyncIterable<string>) {
@@ -85,18 +84,15 @@ async function* textChunker(input: string) {
 
 		for await (const text of generate(input)) {
 		// for await (const text of generateMock(input)) {
-				console.log(`text:${text}`);
 				const isEndOfSentence = splitters.includes(buffer.slice(-1));
 				const ifChunkStartsWithNewSentence = splitters.includes(text[0]);
 
 				if (isEndOfSentence) {
 						// console.log(`isEndOfSentence:${isEndOfSentence}, buffer:${buffer}`);
-						console.log(`yeilding eos:${buffer}`);
 						yield buffer + " ";
 						// reset buffer
 						buffer = text;
 				} else if (ifChunkStartsWithNewSentence) {
-						console.log(`yeilding:${buffer}${text[0] + " "}`);
 						yield buffer + text[0] + " ";
 						buffer = text.slice(1);
 				} else {
@@ -112,12 +108,10 @@ async function* textChunker(input: string) {
 export async function textToSpeechInputStreaming(
 		voiceId: string,
 		userPrompt: string,
-): Promise<{ tts: StreamableValue<string> }>{
+): Promise<{ tts: StreamableValue<string>|null }>{
 		try {
 				const url = `wss://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream-input?model_id=eleven_turbo_v2`;
 				const streamableAudio = createStreamableValue("");
-				console.log(url);
-				console.log('userPrompt',userPrompt)
 				const socket = new WebSocket(url);
 
 				socket.onopen = async function (_event: WebSocket.Event): Promise<void> {
@@ -148,12 +142,9 @@ export async function textToSpeechInputStreaming(
 				socket.onmessage = async function (
 						event: WebSocket.MessageEvent,
 				): Promise<void> {
-						console.log("---got message");
 						const data = JSON.parse(event.data.toString()) as ElevenLabsResponse;
-						// console.log(data)
 						if (data.audio) {
 								const debugData = {...data, audio:''};
-								console.log(debugData)
 								streamableAudio.update(
 										JSON.stringify({
 												audio: data.audio,
@@ -181,8 +172,6 @@ export async function textToSpeechInputStreaming(
 
 				return { tts: streamableAudio.value };
 		} catch (e) {
-				console.log(e);
-				console.log('some error occurred in textToSpeechInputStreaming')
 				return { tts: null };
 		}
 }
