@@ -9,7 +9,7 @@
     Aura is a smart voice assistant optimized for low latency responses. It uses Vercel Edge Functions, Whisper Speech Recognition, GPT-4o and Eleven Labs TTS streaming.
     <br />
     <br />
-    <a href="https://heyassistant.co">View Demo</a>
+    <a href="https://voice.julianschoen.co">View Demo</a>
     ·
     <a href="https://github.com/ntegrals/aura-voice/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=">Report Bug</a>
     ·
@@ -28,7 +28,7 @@
 
 ## Demo
 
-You can test the Aura here: [https://heyassistant.co](https://heyassistant.co)
+You can test the Aura here: [https://voice.julianschoen.co](https://voice.julianschoen.co)
 
 ## Motivation
 
