@@ -266,7 +266,8 @@ const AssistantButton: React.FC = () => {
 
           recording ? stopRecording() : startRecording();
         }}
-        className="hover:scale-105 ease-in-out duration-500 hover:cursor-pointer text-[70px]"
+        className={`hover:scale-105 ease-in-out duration-500 hover:cursor-pointer text-[70px] ${thinking ? "disabled" : ""}`}
+        disabled={thinking}
       >
         <div className="rainbow-container">
           <div className="green"></div>
