@@ -77,6 +77,13 @@ body {
   transform: rotateY(180deg) skew(14deg) rotate3d(1.1, 1, 0.9, 0);
   animation: curve-rotate-pink 3s infinite linear;
 }
+.rainbow-container:hover {
+  background-color: rgba(255, 255, 255, 0.8);
+  transition: background-color 0.5s;
+}
+.rainbow-container-active {
+  background-color: rgba(255, 255, 255, 0.8);
+}
 @-webkit-keyframes curve-rotate-green {
   0% {
     transform: rotateY(0) skew(14deg) rotate3d(1.1, 1, 0.9, 0deg);

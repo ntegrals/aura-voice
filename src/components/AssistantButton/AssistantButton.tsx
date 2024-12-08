@@ -97,6 +97,7 @@ const AssistantButton: React.FC = () => {
   // Function to start recording
   const startRecording = () => {
     if (mediaRecorder && mediaRecorderInitialized) {
+      document.querySelector(".rainbow-container")?.classList.add("rainbow-container-active");
       mediaRecorder.start();
       setRecording(true);
     }
@@ -119,6 +120,7 @@ const AssistantButton: React.FC = () => {
       position: "top-right",
     });
     if (mediaRecorder) {
+      document.querySelector(".rainbow-container")?.classList.remove("rainbow-container-active");
       mediaRecorder.stop();
       setRecording(false);
     }
