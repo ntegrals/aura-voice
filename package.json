@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "tsc": "tsc",
+    "format": "prettier --check \"{**/*,*}.{js,ts,tsx,css,md}\"",
+    "format:fix": "prettier --write \"{**/*,*}.{js,ts,tsx,css,md}\""
   },
   "dependencies": {
     "@types/node": "20.4.9",
@@ -16,6 +19,7 @@
     "autoprefixer": "10.4.14",
     "axios": "^1.6.0",
     "debug": "^4.3.4",
+    "elevenlabs": "^1.50.2",
     "framer-motion": "^10.16.4",
     "langchain": "^0.0.182",
     "next": "13.4.13",
@@ -33,6 +37,7 @@
   },
   "devDependencies": {
     "@types/recorder-js": "^1.0.3",
-    "encoding": "^0.1.13"
+    "encoding": "^0.1.13",
+    "prettier": "^3.4.2"
   }
 }
