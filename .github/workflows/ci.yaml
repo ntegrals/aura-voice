@@ -1,0 +1,40 @@
+name: CI
+on:
+  pull_request:
+    branches: [main]
+env:
+  NODE_VERSION: 20.18.1
+jobs:
+  prettier:
+    name: Prettier Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout out repository code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install packages
+        run: npm ci
+      - name: Check code format
+        run: npm run format
+
+  tsc:
+    name: TypeScript Compiler
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout out repository code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install packages
+        run: npm ci
+      - name: Run tsc
+        run: npm run tsc
