@@ -1,0 +1,14 @@
+[project]
+name = "hypergen"
+version = "0.1.0"
+description = "Optimized inference and fine-tuning framework for diffusion (image & video) models."
+readme = "README.md"
+authors = [
+    { name = "Julian Schoen", email = "j.schoen@mail.com" }
+]
+requires-python = ">=3.13"
+dependencies = []
+
+[build-system]
+requires = ["uv_build>=0.8.15,<0.9.0"]
+build-backend = "uv_build"
