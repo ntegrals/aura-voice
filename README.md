@@ -1,4 +1,4 @@
-# HyperGen
+# HyperGen (Pre-Alpha)
 
 **Train & run diffusion models 3x faster with 80% less VRAM**
 
