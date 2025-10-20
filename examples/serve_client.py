@@ -1,4 +1,11 @@
-"""Example client for HyperGen API server."""
+"""
+Example client for HyperGen API server.
+
+Requirements (install separately):
+    pip install openai pillow requests
+
+These are not HyperGen dependencies - they're just for this example.
+"""
 
 import base64
 import io

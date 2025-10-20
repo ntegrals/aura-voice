@@ -35,7 +35,7 @@ xformers = ["xformers>=0.0.25"]
 deepspeed = ["deepspeed>=0.14.0"]
 video = ["av>=12.0.0", "opencv-python>=4.9.0"]
 all = [
-    "hypergen[flash,xformers,deepspeed,video]",
+    "hypergen[dev,flash,xformers,deepspeed,video]",
 ]
 
 [build-system]
