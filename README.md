@@ -1,8 +1,20 @@
-# HyperGen (Pre-Alpha)
+<div align="center">
+
+![HyperGen](.assets/header.webp)
+
+# HyperGen
 
 **Train & run diffusion models 3x faster with 80% less VRAM**
 
 Optimized inference and fine-tuning framework for image & video diffusion models.
+
+![Status](https://img.shields.io/badge/status-pre--alpha-orange)
+![Python](https://img.shields.io/badge/python-3.10+-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+
+</div>
+
+---
 
 ## ✨ Simple as 5 Lines
 
@@ -32,7 +44,7 @@ pip install hypergen
 ### From Source
 
 ```bash
-git clone https://github.com/your-username/hypergen.git
+git clone https://github.com/ntegrals/hypergen.git
 cd hypergen
 pip install -e .
 ```
@@ -228,6 +240,6 @@ MIT
 
 **Note on Aura Voice**: This repository previously hosted Aura Voice, an early tech demo showcasing AI voice capabilities. As the underlying technology evolved significantly beyond that initial demonstration, the demo is no longer representative of current capabilities and has been deprecated.
 
-Thank you to everyone who supported and used Aura Voice! The original code remains accessible at commit [00c18d2](https://github.com/your-username/hypergen/tree/00c18d2) for reference.
+Thank you to everyone who supported and used Aura Voice! The original code remains accessible at commit [00c18d2](https://github.com/ntegrals/hypergen/tree/00c18d2) for reference.
 
 HyperGen represents a new direction focused on optimized diffusion model training and serving.
