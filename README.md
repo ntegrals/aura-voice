@@ -221,3 +221,13 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for det
 ## 📄 License
 
 MIT
+
+---
+
+## 📜 Project History
+
+**Note on Aura Voice**: This repository previously hosted Aura Voice, an early tech demo showcasing AI voice capabilities. As the underlying technology evolved significantly beyond that initial demonstration, the demo is no longer representative of current capabilities and has been deprecated.
+
+Thank you to everyone who supported and used Aura Voice! The original code remains accessible at commit [00c18d2](https://github.com/your-username/hypergen/tree/00c18d2) for reference.
+
+HyperGen represents a new direction focused on optimized diffusion model training and serving.
