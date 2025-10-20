@@ -6,8 +6,37 @@ readme = "README.md"
 authors = [
     { name = "Julian Schoen", email = "j.schoen@mail.com" }
 ]
-requires-python = ">=3.13"
-dependencies = []
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.0.0",
+    "diffusers>=0.30.0",
+    "transformers>=4.40.0",
+    "peft>=0.8.0",
+    "accelerate>=0.30.0",
+    "safetensors>=0.4.0",
+    "pillow>=10.0.0",
+    "numpy>=1.24.0",
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "pydantic>=2.0.0",
+]
+
+[project.scripts]
+hypergen = "hypergen.cli.main:cli_entrypoint"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "ruff>=0.1.0",
+]
+flash = ["flash-attn>=2.5.0"]
+xformers = ["xformers>=0.0.25"]
+deepspeed = ["deepspeed>=0.14.0"]
+video = ["av>=12.0.0", "opencv-python>=4.9.0"]
+all = [
+    "hypergen[dev,flash,xformers,deepspeed,video]",
+]
 
 [build-system]
 requires = ["uv_build>=0.8.15,<0.9.0"]
