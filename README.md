@@ -1,8 +1,20 @@
-# HyperGen (Pre-Alpha)
+<div align="center">
+
+![HyperGen](.assets/header.webp)
+
+# HyperGen
 
 **Train & run diffusion models 3x faster with 80% less VRAM**
 
 Optimized inference and fine-tuning framework for image & video diffusion models.
+
+![Status](https://img.shields.io/badge/status-pre--alpha-orange)
+![Python](https://img.shields.io/badge/python-3.10+-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+
+</div>
+
+---
 
 ## ✨ Simple as 5 Lines
 
@@ -32,7 +44,7 @@ pip install hypergen
 ### From Source
 
 ```bash
-git clone https://github.com/your-username/hypergen.git
+git clone https://github.com/ntegrals/hypergen.git
 cd hypergen
 pip install -e .
 ```
