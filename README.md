@@ -24,6 +24,21 @@ lora = m.train_lora(ds, steps=1000)
 
 That's it! HyperGen handles optimization, memory management, and acceleration automatically.
 
+## 📓 Interactive Notebooks
+
+Try HyperGen in interactive Jupyter notebooks:
+
+| Notebook | Description | Time | Colab |
+|----------|-------------|------|-------|
+| **Minimal Example** | 5-minute quickstart - see it work immediately | ~5 min | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](notebooks/minimal_example.ipynb) |
+| **LoRA Training Quickstart** | Complete tutorial: dataset → training → inference → comparison | ~15 min | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](notebooks/train_lora_quickstart.ipynb) |
+
+**Notebooks include:**
+- Loading datasets from HuggingFace
+- Training LoRAs with real diffusion models
+- Generating images with trained models
+- Side-by-side comparisons
+
 ## ⚡ Quickstart
 
 ```bash
@@ -174,7 +189,14 @@ response = client.images.generate(
 
 ## 📖 Examples
 
-Check out the [examples/](examples/) directory for complete code samples:
+### Notebooks
+Interactive Jupyter notebooks with complete tutorials in [notebooks/](notebooks/):
+
+- [minimal_example.ipynb](notebooks/minimal_example.ipynb) - 5-minute quickstart example
+- [train_lora_quickstart.ipynb](notebooks/train_lora_quickstart.ipynb) - Complete end-to-end tutorial with HuggingFace dataset
+
+### Python Scripts
+Code samples in the [examples/](examples/) directory:
 
 - [quickstart.py](examples/quickstart.py) - Minimal 5-line training example
 - [complete_example.py](examples/complete_example.py) - All features demonstrated
@@ -185,10 +207,10 @@ Check out the [examples/](examples/) directory for complete code samples:
 ### Phase 1: Core Architecture ✅
 - [x] Model loading and management
 - [x] Dataset handling with caption support
-- [x] LoRA training scaffold
+- [x] LoRA training implementation
 - [x] OpenAI-compatible API server
 - [x] Request queue management
-- [ ] Complete training loop implementation
+- [x] Training loop with noise prediction
 
 ### Phase 2: Optimizations ⚡
 - [ ] Gradient checkpointing
