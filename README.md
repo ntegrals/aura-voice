@@ -2,7 +2,11 @@
 
 ![HyperGen](.assets/header.webp)
 
-### Train FLUX, SDXL & SD3 3x faster with 80% less VRAM!
+# HyperGen (Pre-Alpha)
+
+**Train & run diffusion models 3x faster with 80% less VRAM**
+
+Optimized inference and fine-tuning framework for image & video diffusion models.
 
 ![Status](https://img.shields.io/badge/status-pre--alpha-orange)
 ![Python](https://img.shields.io/badge/python-3.10+-blue)
