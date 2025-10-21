@@ -47,7 +47,6 @@ pip install -e .
 | **SDXL Turbo** | `stabilityai/sdxl-turbo` | Image (Fast) |
 | **SD 3 Medium** | `stabilityai/stable-diffusion-3-medium-diffusers` | Image |
 | **SD v1.5** | `runwayml/stable-diffusion-v1-5` | Image |
-| **CogVideoX** | `THUDM/CogVideoX-5b` | Video |
 
 **Universal Support**: HyperGen works with any diffusers-compatible model from HuggingFace.
 
@@ -168,7 +167,7 @@ response = client.images.generate(
 ## ⭐ Key Features
 
 - **Dead Simple API**: Train LoRAs in 5 lines of code - simple for beginners, powerful for experts
-- **Universal Model Support**: Works with FLUX, SDXL, SD3, CogVideoX, and any diffusers-compatible model
+- **Universal Model Support**: Works with FLUX, SDXL, SD3, and any diffusers-compatible model
 - **Optimized Performance**: 3x faster training with 80% less VRAM
 - **Production Serving**: OpenAI-compatible API server with request queuing
 - **Built on Best Practices**: Leverages diffusers, PEFT, and PyTorch under the hood
@@ -201,7 +200,6 @@ Check out the [examples/](examples/) directory for complete code samples:
 ### Phase 3: Advanced Features 🚀
 - [ ] Multi-GPU training support
 - [ ] Multi-GPU serving
-- [ ] Enhanced video model support
 - [ ] Custom CUDA kernels
 - [ ] Hot-swappable LoRAs
 
