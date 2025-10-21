@@ -45,15 +45,24 @@ Try HyperGen in interactive Jupyter notebooks:
 
 ## ⚡ Quickstart
 
+### Install from PyPI
 ```bash
 pip install hypergen
 ```
 
-### From Source
+**Note:** This will install both the Python library and the `hypergen` CLI command.
+
+### Install from Source
 ```bash
 git clone https://github.com/ntegrals/hypergen.git
 cd hypergen
 pip install -e .
+```
+
+**After installation, verify the CLI is available:**
+```bash
+hypergen --version
+hypergen --help
 ```
 
 ## 🎯 Supported Models
@@ -136,7 +145,9 @@ images = m.generate(
 
 HyperGen provides a production-ready API server with request queuing, similar to vLLM.
 
-### Start the Server
+### CLI Command
+
+After installing HyperGen, the `hypergen` CLI command is available globally:
 
 ```bash
 # Basic serving
@@ -154,6 +165,11 @@ hypergen serve black-forest-labs/FLUX.1-dev \
   --dtype bfloat16 \
   --max-queue-size 100 \
   --max-batch-size 4
+```
+
+**Available CLI Options:**
+```bash
+hypergen serve --help
 ```
 
 ### Use with OpenAI Client
@@ -183,6 +199,17 @@ response = client.images.generate(
 - Optional API key authentication
 - Production-ready (FastAPI + uvicorn)
 
+**Test the API:**
+```bash
+# Start the server
+hypergen serve stabilityai/sdxl-turbo --port 8000
+
+# Run the test script (in another terminal)
+python examples/test_endpoint.py
+```
+
+See [test_endpoint.py](examples/test_endpoint.py) for comprehensive endpoint testing.
+
 ## ⭐ Key Features
 
 - **Dead Simple API**: Train LoRAs in 5 lines of code - simple for beginners, powerful for experts
@@ -204,7 +231,10 @@ Code samples in the [examples/](examples/) directory:
 
 - [quickstart.py](examples/quickstart.py) - Minimal 5-line training example
 - [complete_example.py](examples/complete_example.py) - All features demonstrated
-- [serve_client.py](examples/serve_client.py) - API client usage examples
+- [serve_client.py](examples/serve_client.py) - API client usage with OpenAI SDK
+- [test_endpoint.py](examples/test_endpoint.py) - Comprehensive API endpoint testing
+
+See the [examples/README.md](examples/README.md) for detailed documentation.
 
 ## 🛣️ Roadmap
 
@@ -243,12 +273,26 @@ hypergen/
 
 ## 💾 Installation
 
-### Basic Installation
+### Install from PyPI (Recommended)
 ```bash
 pip install hypergen
 ```
 
-### From Source
+This installs:
+- ✅ The `hypergen` Python library
+- ✅ The `hypergen` CLI command (globally available)
+
+**Verify installation:**
+```bash
+# Check CLI is available
+hypergen --version
+hypergen --help
+
+# Test in Python
+python -c "from hypergen import model, dataset; print('✓ HyperGen installed')"
+```
+
+### Install from Source
 ```bash
 git clone https://github.com/ntegrals/hypergen.git
 cd hypergen
@@ -256,6 +300,13 @@ pip install -e .
 ```
 
 **Requirements**: Python 3.10+
+
+### Troubleshooting
+
+If `hypergen` command is not found after installation:
+1. Ensure your Python scripts directory is in PATH
+2. Try reinstalling: `pip install --force-reinstall hypergen`
+3. For editable installs, use: `pip install -e .` (not `pip install -e src/`)
 
 ## 🤝 Contributing
 
