@@ -2,11 +2,7 @@
 
 ![HyperGen](.assets/header.webp)
 
-# HyperGen
-
-**Train & run diffusion models 3x faster with 80% less VRAM**
-
-Optimized inference and fine-tuning framework for image & video diffusion models.
+### Train FLUX, SDXL & SD3 3x faster with 80% less VRAM!
 
 ![Status](https://img.shields.io/badge/status-pre--alpha-orange)
 ![Python](https://img.shields.io/badge/python-3.10+-blue)
@@ -14,9 +10,9 @@ Optimized inference and fine-tuning framework for image & video diffusion models
 
 </div>
 
----
+## ✨ Train in 5 Lines
 
-## ✨ Simple as 5 Lines
+Train LoRAs on diffusion models with minimal code. Add your images, run the script, and export your trained LoRA.
 
 ```python
 from hypergen import model, dataset
@@ -28,30 +24,50 @@ lora = m.train_lora(ds, steps=1000)
 
 That's it! HyperGen handles optimization, memory management, and acceleration automatically.
 
-## 🚀 Features
-
-- **Dead Simple API**: Train LoRAs in 5 lines of code
-- **Universal**: Works with FLUX, SDXL, SD3, CogVideoX, and more
-- **Optimized**: Built on top of diffusers, PEFT, and PyTorch
-- **Flexible**: Simple for beginners, powerful for experts
-
-## Installation
+## ⚡ Quickstart
 
 ```bash
 pip install hypergen
 ```
 
 ### From Source
-
 ```bash
 git clone https://github.com/ntegrals/hypergen.git
 cd hypergen
 pip install -e .
 ```
 
-## Quick Start
+## 🎯 Supported Models
 
-### Load a Dataset
+| Model Family | Model ID | Type |
+|-------------|----------|------|
+| **FLUX.1-dev** | `black-forest-labs/FLUX.1-dev` | Image |
+| **FLUX.1-schnell** | `black-forest-labs/FLUX.1-schnell` | Image (Fast) |
+| **SDXL** | `stabilityai/stable-diffusion-xl-base-1.0` | Image |
+| **SDXL Turbo** | `stabilityai/sdxl-turbo` | Image (Fast) |
+| **SD 3 Medium** | `stabilityai/stable-diffusion-3-medium-diffusers` | Image |
+| **SD v1.5** | `runwayml/stable-diffusion-v1-5` | Image |
+| **CogVideoX** | `THUDM/CogVideoX-5b` | Video |
+
+**Universal Support**: HyperGen works with any diffusers-compatible model from HuggingFace.
+
+## 📖 Usage Examples
+
+### Train a LoRA
+
+```python
+from hypergen import model, dataset
+
+# Load model and dataset
+m = model.load("stabilityai/stable-diffusion-xl-base-1.0")
+m.to("cuda")
+ds = dataset.load("./my_images")
+
+# Train LoRA
+lora = m.train_lora(ds, steps=1000)
+```
+
+### Load Dataset with Captions
 
 ```python
 from hypergen import dataset
@@ -60,8 +76,7 @@ from hypergen import dataset
 ds = dataset.load("./my_training_images")
 print(f"Loaded {len(ds)} images")
 
-# Supports captions too!
-# Just put a .txt file next to each image:
+# Supports captions! Just put a .txt file next to each image:
 #   my_images/
 #     photo1.jpg
 #     photo1.txt  <- "A beautiful sunset"
@@ -69,23 +84,7 @@ print(f"Loaded {len(ds)} images")
 #     photo2.txt  <- "A mountain landscape"
 ```
 
-### Train a LoRA
-
-```python
-from hypergen import model, dataset
-
-# Load model
-m = model.load("stabilityai/stable-diffusion-xl-base-1.0")
-m.to("cuda")
-
-# Load dataset
-ds = dataset.load("./my_images")
-
-# Train LoRA
-lora = m.train_lora(ds, steps=1000)
-```
-
-### Advanced Options
+### Advanced Training Options
 
 ```python
 # Customize everything
@@ -115,34 +114,21 @@ images = m.generate(
 )
 ```
 
-## 🎯 Supported Models
-
-HyperGen works with any diffusion model from HuggingFace:
-
-- **FLUX.1**: `black-forest-labs/FLUX.1-dev`
-- **SDXL**: `stabilityai/stable-diffusion-xl-base-1.0`
-- **SD 3**: `stabilityai/stable-diffusion-3-medium-diffusers`
-- **CogVideoX**: `THUDM/CogVideoX-5b` (video)
-- Any other diffusers-compatible model
-
 ## 🌐 Serve Models (OpenAI-Compatible API)
 
-HyperGen provides a production-ready API server with request queuing, similar to vLLM:
+HyperGen provides a production-ready API server with request queuing, similar to vLLM.
 
-### Start Server
+### Start the Server
 
 ```bash
 # Basic serving
 hypergen serve stabilityai/stable-diffusion-xl-base-1.0
 
 # With authentication
-hypergen serve stabilityai/stable-diffusion-xl-base-1.0 \
-  --api-key token-abc123
+hypergen serve stabilityai/stable-diffusion-xl-base-1.0 --api-key token-abc123
 
 # With LoRA
-hypergen serve stabilityai/stable-diffusion-xl-base-1.0 \
-  --lora ./my_lora \
-  --api-key token-abc123
+hypergen serve stabilityai/stable-diffusion-xl-base-1.0 --lora ./my_lora --api-key token-abc123
 
 # Custom settings
 hypergen serve black-forest-labs/FLUX.1-dev \
@@ -172,67 +158,96 @@ response = client.images.generate(
 )
 ```
 
-### Features
+**API Server Features:**
+- OpenAI-compatible drop-in replacement for image generation
+- Automatic request batching and queuing
+- Dynamic LoRA loading and switching
+- Optional API key authentication
+- Production-ready (FastAPI + uvicorn)
 
-- **OpenAI-Compatible**: Drop-in replacement for OpenAI's image generation API
-- **Request Queue**: Automatic request batching and queuing
-- **LoRA Support**: Load and switch LoRAs dynamically
-- **Authentication**: Optional API key authentication
-- **Production-Ready**: Built on FastAPI + uvicorn
+## ⭐ Key Features
 
-See [examples/serve_client.py](examples/serve_client.py) for complete examples.
+- **Dead Simple API**: Train LoRAs in 5 lines of code - simple for beginners, powerful for experts
+- **Universal Model Support**: Works with FLUX, SDXL, SD3, CogVideoX, and any diffusers-compatible model
+- **Optimized Performance**: 3x faster training with 80% less VRAM
+- **Production Serving**: OpenAI-compatible API server with request queuing
+- **Built on Best Practices**: Leverages diffusers, PEFT, and PyTorch under the hood
 
 ## 📖 Examples
 
-Check out the [examples/](examples/) directory:
+Check out the [examples/](examples/) directory for complete code samples:
 
-- [quickstart.py](examples/quickstart.py) - Minimal 5-line example
+- [quickstart.py](examples/quickstart.py) - Minimal 5-line training example
 - [complete_example.py](examples/complete_example.py) - All features demonstrated
-- [serve_client.py](examples/serve_client.py) - API client examples
-
-## 🏗️ Architecture
-
-```
-hypergen/
-├── model/       # Model loading and management
-├── dataset/     # Dataset handling
-├── training/    # LoRA training pipelines
-├── serve/       # API server and queue management
-├── inference/   # Inference optimizations
-└── optimization/ # Performance improvements
-```
+- [serve_client.py](examples/serve_client.py) - API client usage examples
 
 ## 🛣️ Roadmap
 
-**Phase 1**: ✅ Core Architecture
-- [x] Model loading
-- [x] Dataset handling
+### Phase 1: Core Architecture ✅
+- [x] Model loading and management
+- [x] Dataset handling with caption support
 - [x] LoRA training scaffold
 - [x] OpenAI-compatible API server
 - [x] Request queue management
 - [ ] Complete training loop implementation
 
-**Phase 2**: ⚡ Optimizations
+### Phase 2: Optimizations ⚡
 - [ ] Gradient checkpointing
 - [ ] Mixed precision training
 - [ ] Flash Attention support
-- [ ] Auto-configuration
+- [ ] Auto-configuration for optimal performance
 - [ ] Request batching for inference
 
-**Phase 3**: 🚀 Advanced Features
-- [ ] Multi-GPU training
+### Phase 3: Advanced Features 🚀
+- [ ] Multi-GPU training support
 - [ ] Multi-GPU serving
-- [ ] Video model support
+- [ ] Enhanced video model support
 - [ ] Custom CUDA kernels
-- [ ] LoRA hot-swapping
+- [ ] Hot-swappable LoRAs
+
+## 🏗️ Architecture
+
+```
+hypergen/
+├── model/        # Model loading and management
+├── dataset/      # Dataset handling with captions
+├── training/     # LoRA training pipelines
+├── serve/        # API server and queue management
+├── inference/    # Inference optimizations
+└── optimization/ # Performance improvements
+```
+
+## 💾 Installation
+
+### Basic Installation
+```bash
+pip install hypergen
+```
+
+### From Source
+```bash
+git clone https://github.com/ntegrals/hypergen.git
+cd hypergen
+pip install -e .
+```
+
+**Requirements**: Python 3.10+
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## 📄 License
 
-MIT
+MIT License - see [LICENSE](LICENSE) for details.
+
+## 🔗 Links and Resources
+
+| Type | Links |
+|------|-------|
+| 📚 **Examples** | [View Examples Directory](examples/) |
+| 🐛 **Issues** | [Report Issues](https://github.com/ntegrals/hypergen/issues) |
+| 💬 **Discussions** | [Join Discussions](https://github.com/ntegrals/hypergen/discussions) |
 
 ---
 
