@@ -69,12 +69,22 @@ class Model:
             torch_dtype = dtype_map.get(torch_dtype, torch.float16)
 
         # Load the pipeline with optimizations
-        pipeline = DiffusionPipeline.from_pretrained(
-            model_id,
-            torch_dtype=torch_dtype,
-            use_safetensors=True,
-            **kwargs
-        )
+        # Use 'dtype' for newer diffusers, fallback to 'torch_dtype' for compatibility
+        try:
+            pipeline = DiffusionPipeline.from_pretrained(
+                model_id,
+                dtype=torch_dtype,
+                use_safetensors=True,
+                **kwargs
+            )
+        except TypeError:
+            # Fallback for older diffusers versions
+            pipeline = DiffusionPipeline.from_pretrained(
+                model_id,
+                torch_dtype=torch_dtype,
+                use_safetensors=True,
+                **kwargs
+            )
 
         return cls(pipeline)
 
