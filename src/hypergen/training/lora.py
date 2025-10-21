@@ -56,13 +56,14 @@ class LoRATrainer:
             # Default targets for UNet attention layers
             self.target_modules = ["to_q", "to_k", "to_v", "to_out.0"]
 
+        # Note: We don't specify task_type for diffusion models (UNet)
+        # PEFT will handle it correctly without task_type
         config = LoraConfig(
             r=self.rank,
             lora_alpha=self.alpha,
             target_modules=self.target_modules,
             lora_dropout=self.dropout,
             bias="none",
-            task_type="CAUSAL_LM",  # Will be adjusted based on model type
         )
 
         return config
